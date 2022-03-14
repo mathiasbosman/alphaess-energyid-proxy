@@ -16,9 +16,13 @@ import org.springframework.validation.annotation.Validated;
 @EnableScheduling
 @ConfigurationProperties(prefix = PREFIX)
 public class EnergyIdProperties {
+
   public static final String PREFIX = "energyid";
 
   @NotNull
   private URL secretUrl;
+
+  @NotNull
+  private int maxDataBatchSize;
 
 }

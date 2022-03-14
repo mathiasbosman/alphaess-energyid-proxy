@@ -1,5 +1,7 @@
 package be.mathiasbosman.alphaessenergyidproxy.domain.energyid;
 
+import be.mathiasbosman.alphaessenergyidproxy.config.ProxyProperties.EnergyIdMeter;
+import java.util.ArrayList;
 import java.util.List;
 
 public record MeterReadingsDto(
@@ -8,8 +10,17 @@ public record MeterReadingsDto(
     String metric,
     String unit,
     String readingType,
-    // max 100
     List<List<Object>> data
 ) {
 
+  public static MeterReadingsDto fromEnergyIdMeter(EnergyIdMeter energyIdMeter) {
+    return new MeterReadingsDto(
+        energyIdMeter.getRemoteId(),
+        energyIdMeter.getRemoteName(),
+        energyIdMeter.getMetric(),
+        energyIdMeter.getUnit(),
+        energyIdMeter.getReadingType(),
+        new ArrayList<>()
+    );
+  }
 }
