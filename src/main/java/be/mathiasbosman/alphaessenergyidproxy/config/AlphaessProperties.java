@@ -3,10 +3,7 @@ package be.mathiasbosman.alphaessenergyidproxy.config;
 import static be.mathiasbosman.alphaessenergyidproxy.config.AlphaessProperties.PREFIX;
 
 import java.net.URL;
-import java.util.List;
-import java.util.TimeZone;
 import javax.validation.constraints.NotNull;
-import lombok.Builder;
 import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
@@ -35,7 +32,6 @@ public class AlphaessProperties {
 
   @Getter
   @Setter
-  @Builder
   public static class Credentials {
     @NotNull
     private String username;

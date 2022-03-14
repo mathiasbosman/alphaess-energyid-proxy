@@ -1,7 +1,7 @@
 package be.mathiasbosman.alphaessenergyidproxy.domain.energyid;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 
-public record MeterReadingDataDto(Date date, double reading) {
+public record MeterReadingDataDto(LocalDateTime date, double reading) {
 
 }

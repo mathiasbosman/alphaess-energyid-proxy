@@ -59,8 +59,9 @@ class AlphaessServiceTest {
     when(restTemplate.postForObject(any(), any(), eq(LoginResponseEntity.class)))
         .thenReturn(null);
 
+    LoginDto loginDto = new LoginDto("foo", "bar");
     assertThrows(IllegalStateException.class,
-        () -> alphaessService.authenticate(new LoginDto("foo", "bar")));
+        () -> alphaessService.authenticate(loginDto));
   }
 
   @Test
@@ -101,7 +102,10 @@ class AlphaessServiceTest {
   }
 
   private LoginData mockAuth() {
-    alphaessProperties.setCredentials(Credentials.builder().username("foo").password("bar").build());
+    Credentials credentials = new Credentials();
+    credentials.setUsername("foo");
+    credentials.setPassword("bar");
+    alphaessProperties.setCredentials(credentials);
     LoginData loginData = LoginData.builder().accessToken("123").build();
     LoginResponseEntity responseEntity = new LoginResponseEntity();
     responseEntity.setData(loginData);
