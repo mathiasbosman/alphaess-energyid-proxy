@@ -1,14 +1,14 @@
-package be.mathiasbosman.alphaessenergyidproxy;
+package be.mathiasbosman.alphaessenergyidproxy.domain.energyid;
 
-import be.mathiasbosman.alphaessenergyidproxy.config.AlphaessProperties;
 import be.mathiasbosman.alphaessenergyidproxy.config.ProxyProperties;
 import be.mathiasbosman.alphaessenergyidproxy.config.ProxyProperties.EnergyIdMeter;
 import be.mathiasbosman.alphaessenergyidproxy.domain.alphaess.AlphaessService;
 import be.mathiasbosman.alphaessenergyidproxy.domain.alphaess.response.SticsByPeriodResponseEntity.Statistics;
-import be.mathiasbosman.alphaessenergyidproxy.domain.energyid.MeterReadingDataDto;
-import be.mathiasbosman.alphaessenergyidproxy.domain.energyid.MeterReadingsDto;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.Collections;
 import java.util.Date;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -19,6 +19,7 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class ExportJob {
 
+  private final WebhookAdapter webhookAdapter;
   private final AlphaessService alphaessService;
   private final ProxyProperties proxyProperties;
 
@@ -29,23 +30,26 @@ public class ExportJob {
     Date today = new Date();
     proxyProperties.getMeters()
         .forEach(meterInfo -> alphaessService.getDailyStatistics(meterInfo.getAlphaSn(), today)
-            .ifPresent(statistics -> exportStatistics(meterInfo, statistics, today)
-    ));
+            .ifPresent(statistics -> exportStatistics(meterInfo, statistics, today)));
     log.info("Job ended");
   }
 
   void exportStatistics(EnergyIdMeter meter, Statistics stats, Date date) {
-    //create reading data
-    MeterReadingDataDto dataDto = new MeterReadingDataDto(date, stats.getPvTotal());
+    //create reading data at start of day
+    LocalDate localDate = date.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+    MeterReadingDataDto dataDto = new MeterReadingDataDto(localDate.atStartOfDay(),
+        stats.getPvTotal());
+    // convert dataDto to list of objects
+    List<Object> data = List.of(dataDto.date(), dataDto.reading());
     MeterReadingsDto exportDto = new MeterReadingsDto(
         meter.getRemoteId(),
         meter.getRemoteName(),
         meter.getMetric(),
         meter.getUnit(),
         meter.getReadingType(),
-        Collections.singletonList(dataDto)
+        Collections.singletonList(data)
     );
 
-    // todo call webhook
+    webhookAdapter.postReadings(exportDto);
   }
 }

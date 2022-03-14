@@ -28,8 +28,6 @@ public class AlphaessService {
   private final RestTemplate restTemplate;
   private final AlphaessProperties alphaessProperties;
 
-  private static final String AUTH_PATH = "/Account/Login";
-  private static final String STATS_DAILY_PATH = "/Power/SticsByPeriod";
 
   private LoginData loginData;
 
@@ -55,7 +53,8 @@ public class AlphaessService {
   }
 
   public LoginData authenticate(LoginDto loginDto) {
-    URI uri = buildUri(AUTH_PATH);
+    URI uri = buildUri(alphaessProperties.getEndpoints().getAuthentication());
+    log.debug("Authenticating on {}", uri);
     HttpEntity<LoginDto> request = new HttpEntity<>(loginDto, buildHeaders(false));
     LoginResponseEntity responseEntity = restTemplate.postForObject(uri, request,
         LoginResponseEntity.class);
@@ -66,20 +65,21 @@ public class AlphaessService {
   }
 
   boolean isTokenValid(@NonNull LoginData loginData) {
-    if (loginData.getAccessToken() != null) {
-      if (loginData.getExpiresIn() != 0 && loginData.getTokenCreateTime() != null) {
-        Date date = new Date();
-        long diffInMillies = Math.abs(date.getTime() - loginData.getTokenCreateTime().getTime());
-        long diff = TimeUnit.SECONDS.convert(diffInMillies, TimeUnit.MILLISECONDS);
-        return diff < loginData.getExpiresIn();
-      }
+    if (loginData.getAccessToken() != null
+        && loginData.getExpiresIn() != 0
+        && loginData.getTokenCreateTime() != null) {
+      Date date = new Date();
+      long diffInMillies = Math.abs(date.getTime() - loginData.getTokenCreateTime().getTime());
+      long diff = TimeUnit.SECONDS.convert(diffInMillies, TimeUnit.MILLISECONDS);
+      return diff < loginData.getExpiresIn();
     }
     return false;
   }
 
 
   public Optional<Statistics> getDailyStatistics(@NonNull String serial, @NonNull Date date) {
-    URI uri = buildUri(STATS_DAILY_PATH);
+    URI uri = buildUri(alphaessProperties.getEndpoints().getDailyStats());
+    log.debug("Getting statistics on {} for {} on {}", uri, serial, date);
     StatisticsDto statisticsDto = new StatisticsDto(date, date, new Date(), 0, serial, "", true);
     HttpEntity<StatisticsDto> request = new HttpEntity<>(statisticsDto, buildHeaders(true));
     SticsByPeriodResponseEntity result = restTemplate.postForObject(uri, request,

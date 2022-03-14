@@ -9,7 +9,7 @@ public record MeterReadingsDto(
     String unit,
     String readingType,
     // max 100
-    List<MeterReadingDataDto> data
+    List<List<Object>> data
 ) {
 
 }

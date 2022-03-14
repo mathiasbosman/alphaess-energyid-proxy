@@ -26,7 +26,7 @@ public class ProxyProperties {
   private List<EnergyIdMeter> meters;
 
   private String timezone = TimeZone.getDefault().getID();
-  private String uploadCron = "0 50 23 * * ?";
+  private String exportCron = "0 50 23 * * ?";
 
   @Getter
   @Setter

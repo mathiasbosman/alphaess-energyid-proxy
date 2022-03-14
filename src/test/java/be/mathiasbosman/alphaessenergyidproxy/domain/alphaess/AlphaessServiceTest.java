@@ -8,6 +8,7 @@ import static org.mockito.Mockito.when;
 
 import be.mathiasbosman.alphaessenergyidproxy.config.AlphaessProperties;
 import be.mathiasbosman.alphaessenergyidproxy.config.AlphaessProperties.Credentials;
+import be.mathiasbosman.alphaessenergyidproxy.config.AlphaessProperties.Endpoints;
 import be.mathiasbosman.alphaessenergyidproxy.domain.alphaess.response.LoginResponseEntity;
 import be.mathiasbosman.alphaessenergyidproxy.domain.alphaess.response.LoginResponseEntity.LoginData;
 import be.mathiasbosman.alphaessenergyidproxy.domain.alphaess.response.SticsByPeriodResponseEntity;
@@ -31,12 +32,16 @@ class AlphaessServiceTest {
   @Mock
   private RestTemplate restTemplate;
   private final AlphaessProperties alphaessProperties = new AlphaessProperties();
+  private final Endpoints endpoints = new Endpoints();
 
   private AlphaessService alphaessService;
 
   @BeforeEach
   void initProps() throws MalformedURLException {
     alphaessProperties.setBaseUrl(new URL("https://foo"));
+    endpoints.setAuthentication("/auth");
+    endpoints.setDailyStats("/stats");
+    alphaessProperties.setEndpoints(endpoints);
     alphaessService = new AlphaessService(restTemplate, alphaessProperties);
   }
 
@@ -59,8 +64,9 @@ class AlphaessServiceTest {
     when(restTemplate.postForObject(any(), any(), eq(LoginResponseEntity.class)))
         .thenReturn(null);
 
+    LoginDto loginDto = new LoginDto("foo", "bar");
     assertThrows(IllegalStateException.class,
-        () -> alphaessService.authenticate(new LoginDto("foo", "bar")));
+        () -> alphaessService.authenticate(loginDto));
   }
 
   @Test
@@ -101,7 +107,10 @@ class AlphaessServiceTest {
   }
 
   private LoginData mockAuth() {
-    alphaessProperties.setCredentials(Credentials.builder().username("foo").password("bar").build());
+    Credentials credentials = new Credentials();
+    credentials.setUsername("foo");
+    credentials.setPassword("bar");
+    alphaessProperties.setCredentials(credentials);
     LoginData loginData = LoginData.builder().accessToken("123").build();
     LoginResponseEntity responseEntity = new LoginResponseEntity();
     responseEntity.setData(loginData);
