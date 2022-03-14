@@ -28,14 +28,26 @@ public class AlphaessProperties {
   private URL baseUrl;
 
   @NotNull
+  private Endpoints endpoints;
+
+  @NotNull
   private Credentials credentials;
 
   @Getter
   @Setter
   public static class Credentials {
+
     @NotNull
     private String username;
     @NotNull
     private String password;
+  }
+
+  @Getter
+  @Setter
+  public static class Endpoints {
+
+    private String authentication;
+    private String dailyStats;
   }
 }

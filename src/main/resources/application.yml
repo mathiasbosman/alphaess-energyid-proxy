@@ -7,6 +7,9 @@ spring:
 
 alphaess:
   base-url: "https://www.alphaess.com/api"
+  endpoints:
+    authentication: "/Account/Login"
+    daily-stats: "/Power/SticsByPeriod"
   credentials:
     username: "foo"
     password: "bar"
