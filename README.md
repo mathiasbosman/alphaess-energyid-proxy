@@ -4,8 +4,7 @@
 
 This proxy uses the EnergyID webhook to import data from the AlphaESS battery/inverter.
 
-It will take all date of the current date and post it to the EnergyID webhook. This is done via a
-cron-job.
+By default, the cronjob will query for date for the past week up until the day before today.
 
 ## Configuration
 
@@ -29,7 +28,7 @@ To connect the EnergyID webhook you need the provided secret url and set it as s
 
 ````yaml
 energyid:
-  secret-url: "https://hooks.energyid.eu/services/WebhookIn/4a0a4e77-33ff-4fb0-9535-155ad7af20f9/OJ7SO8YMVB8Q"
+  secret-url: "https://hooks.energyid.eu/services/WebhookIn/xxxxx-xxx/..."
 
 ````
 
@@ -57,7 +56,7 @@ proxy:
 
 **Be aware that all readings will be marked as read at 00:00 of the current day.**
 
-If need be the cron job can be configured although, it is advised to let it run as late as possible.
+If need be several settings can be adjusted.
 
 ````yaml
 proxy:
