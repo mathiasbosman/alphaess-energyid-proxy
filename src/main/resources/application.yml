@@ -1,0 +1,26 @@
+spring:
+  jackson:
+    mapper:
+      accept_case_insensitive_properties: true
+  main:
+    banner-mode: off
+
+alphaess:
+  base-url: "https://www.alphaess.com/api"
+  credentials:
+    username: "foo"
+    password: "bar"
+
+proxy:
+  timezone: "Europe/Brussels"
+  export-cron: "0 50 23 * * ?"
+  meters:
+    - alphaSn: "FOO_BAR"
+      remoteId: "FOO_BAR"
+      remoteName: "FOO_BAR"
+      metric: "solarPhotovoltaicProduction"
+      unit: "kWh"
+      readingType: "premarkedInterval"
+
+energyid:
+  secret-url: "https://hooks.energyid.eu/services/WebhookIn/xxxxxxxx-xxxx-xxxx-xxxx"
