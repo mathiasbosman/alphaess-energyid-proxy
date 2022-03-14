@@ -8,6 +8,7 @@ import static org.mockito.Mockito.when;
 
 import be.mathiasbosman.alphaessenergyidproxy.config.AlphaessProperties;
 import be.mathiasbosman.alphaessenergyidproxy.config.AlphaessProperties.Credentials;
+import be.mathiasbosman.alphaessenergyidproxy.config.AlphaessProperties.Endpoints;
 import be.mathiasbosman.alphaessenergyidproxy.domain.alphaess.response.LoginResponseEntity;
 import be.mathiasbosman.alphaessenergyidproxy.domain.alphaess.response.LoginResponseEntity.LoginData;
 import be.mathiasbosman.alphaessenergyidproxy.domain.alphaess.response.SticsByPeriodResponseEntity;
@@ -31,12 +32,16 @@ class AlphaessServiceTest {
   @Mock
   private RestTemplate restTemplate;
   private final AlphaessProperties alphaessProperties = new AlphaessProperties();
+  private final Endpoints endpoints = new Endpoints();
 
   private AlphaessService alphaessService;
 
   @BeforeEach
   void initProps() throws MalformedURLException {
     alphaessProperties.setBaseUrl(new URL("https://foo"));
+    endpoints.setAuthentication("/auth");
+    endpoints.setDailyStats("/stats");
+    alphaessProperties.setEndpoints(endpoints);
     alphaessService = new AlphaessService(restTemplate, alphaessProperties);
   }
 
