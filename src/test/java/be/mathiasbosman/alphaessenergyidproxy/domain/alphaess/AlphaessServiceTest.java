@@ -17,6 +17,7 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
@@ -92,7 +93,7 @@ class AlphaessServiceTest {
     when(restTemplate.postForObject(any(), any(), eq(SticsByPeriodResponseEntity.class)))
         .thenReturn(response);
 
-    Optional<Statistics> stats = alphaessService.getDailyStatistics("sn", new Date());
+    Optional<Statistics> stats = alphaessService.getDailyStatistics("sn", LocalDateTime.now());
     assertThat(stats).isNotEmpty();
     assertThat(stats.get().getFeedIn()).isEqualTo(50);
   }
@@ -103,7 +104,7 @@ class AlphaessServiceTest {
     when(restTemplate.postForObject(any(), any(), eq(SticsByPeriodResponseEntity.class)))
         .thenReturn(null);
 
-    assertThat(alphaessService.getDailyStatistics("123", new Date())).isEmpty();
+    assertThat(alphaessService.getDailyStatistics("123", LocalDateTime.now())).isEmpty();
   }
 
   private LoginData mockAuth() {
@@ -120,5 +121,4 @@ class AlphaessServiceTest {
 
     return loginData;
   }
-
 }

@@ -6,6 +6,8 @@ import be.mathiasbosman.alphaessenergyidproxy.domain.alphaess.response.LoginResp
 import be.mathiasbosman.alphaessenergyidproxy.domain.alphaess.response.SticsByPeriodResponseEntity;
 import be.mathiasbosman.alphaessenergyidproxy.domain.alphaess.response.SticsByPeriodResponseEntity.Statistics;
 import java.net.URI;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
@@ -77,10 +79,12 @@ public class AlphaessService {
   }
 
 
-  public Optional<Statistics> getDailyStatistics(@NonNull String serial, @NonNull Date date) {
+  public Optional<Statistics> getDailyStatistics(@NonNull String serial,
+      @NonNull LocalDateTime date) {
     URI uri = buildUri(alphaessProperties.getEndpoints().getDailyStats());
     log.debug("Getting statistics on {} for {} on {}", uri, serial, date);
-    StatisticsDto statisticsDto = new StatisticsDto(date, date, new Date(), 0, serial, "", true);
+    StatisticsDto statisticsDto = new StatisticsDto(date, date, LocalDate.now(), 0, serial, "",
+        true);
     HttpEntity<StatisticsDto> request = new HttpEntity<>(statisticsDto, buildHeaders(true));
     SticsByPeriodResponseEntity result = restTemplate.postForObject(uri, request,
         SticsByPeriodResponseEntity.class);
