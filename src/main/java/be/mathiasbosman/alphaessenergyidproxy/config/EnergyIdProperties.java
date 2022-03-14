@@ -10,6 +10,9 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.validation.annotation.Validated;
 
+/**
+ * EnergyID properties.
+ */
 @Data
 @Validated
 @Configuration
@@ -19,9 +22,17 @@ public class EnergyIdProperties {
 
   public static final String PREFIX = "energyid";
 
+  /**
+   * Secret {@link URL} of the webhook.
+   */
   @NotNull
   private URL secretUrl;
 
+  private boolean mock = false;
+
+  /**
+   * Max size of the data array to pass.
+   */
   @NotNull
   private int maxDataBatchSize;
 

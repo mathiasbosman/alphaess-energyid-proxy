@@ -14,11 +14,11 @@ class DateUtilsTest {
     ZoneId losAngeles = ZoneId.of("America/Los_Angeles");
     LocalDate localDate = LocalDate.of(2020, 3, 1);
 
-    assertThat(DateUtils.formatISODate(
+    assertThat(DateUtils.formatAsIsoDate(
         localDate.atStartOfDay().atZone(brussels).toLocalDateTime(), brussels
     )).isEqualTo("2020-03-01T00:00:00+01:00");
 
-    assertThat(DateUtils.formatISODate(
+    assertThat(DateUtils.formatAsIsoDate(
         localDate.atStartOfDay().atZone(losAngeles).toLocalDateTime(), losAngeles
     )).isEqualTo("2020-03-01T00:00:00-08:00");
   }

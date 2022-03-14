@@ -6,6 +6,9 @@ import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.web.client.RestTemplate;
 
+/**
+ * Main proxy application.
+ */
 @SpringBootApplication
 public class AlphaEssEnergyIdProxyApplication {
 

@@ -9,6 +9,9 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
+/**
+ * Response entity that holds {@link Statistics} data.
+ */
 @Getter
 @Setter
 @NoArgsConstructor
@@ -16,6 +19,9 @@ public class SticsByPeriodResponseEntity extends ResponseEntity {
 
   private Statistics data;
 
+  /**
+   * Statistics data.
+   */
   @Getter
   @Setter
   @ToString
@@ -26,37 +32,37 @@ public class SticsByPeriodResponseEntity extends ResponseEntity {
   public static class Statistics {
 
     /**
-     * Total PV input
+     * Total PV input.
      */
     @JsonProperty("EpvT")
     private double pvTotal;
     /**
-     * Total feed-in to grid
+     * Total feed-in to grid.
      */
     @JsonProperty("Eout")
     private double feedIn;
     /**
-     * PV to load (directly)
+     * PV to load (directly).
      */
     @JsonProperty("Epv2load")
     private double pvToLoad;
     /**
-     * PV to battery
+     * PV to battery.
      */
     @JsonProperty("Epvcharge")
     private double pvInput;
     /**
-     * Total load
+     * Total load.
      */
     @JsonProperty("Eload")
     private double loadTotal;
     /**
-     * Grid to battery
+     * Grid to battery.
      */
     @JsonProperty("EGridCharge")
     private double gridInput;
     /**
-     * Grid to load (directly)
+     * Grid to load (directly).
      */
     @JsonProperty("EGrid2Load")
     private double gridToLoad;

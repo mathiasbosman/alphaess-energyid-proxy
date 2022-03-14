@@ -5,6 +5,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 
+/**
+ * Controller used to manually trigger an export.
+ */
 @Controller
 @RequiredArgsConstructor
 public class ProxyController {

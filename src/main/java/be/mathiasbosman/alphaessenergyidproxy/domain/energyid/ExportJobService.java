@@ -10,11 +10,15 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.List;
 import java.util.Optional;
+import javax.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
+/**
+ * Service that communicates with the EnergyID webhook.
+ */
 @Slf4j
 @Component
 @RequiredArgsConstructor
@@ -25,6 +29,14 @@ public class ExportJobService {
   private final ProxyProperties proxyProperties;
   private final EnergyIdProperties energyIdProperties;
 
+  @PostConstruct
+  public void logInfo() {
+    log.debug("EnergyID properties: {}", energyIdProperties);
+  }
+
+  /**
+   * Collects data of the past week and pushes it to the webhook.
+   */
   @Scheduled(
       cron = "${" + ProxyProperties.PREFIX + ".export-cron}",
       zone = "${" + ProxyProperties.PREFIX + ".timezone}")
@@ -36,7 +48,7 @@ public class ExportJobService {
     log.info("Job ended");
   }
 
-  public void collectStatisticsForPeriod(LocalDate startDate, LocalDate endDate) {
+  private void collectStatisticsForPeriod(LocalDate startDate, LocalDate endDate) {
     proxyProperties.getMeters().forEach(meter -> {
       MeterReadingsDto exportDto = MeterReadingsDto.fromEnergyIdMeter(meter);
       startDate.datesUntil(endDate)
@@ -51,7 +63,7 @@ public class ExportJobService {
     ZoneId zoneId = ZoneId.of(proxyProperties.getTimezone());
     int maxDataBatch = energyIdProperties.getMaxDataBatchSize();
     LocalDateTime localDateTime = pollDate.atStartOfDay(zoneId).toLocalDateTime();
-    String formattedDate = DateUtils.formatISODate(localDateTime, zoneId);
+    String formattedDate = DateUtils.formatAsIsoDate(localDateTime, zoneId);
     addStatistics(exportDto, sn, localDateTime, formattedDate);
     if (exportDto.data().size() == maxDataBatch) {
       log.warn("Exceeded max data batch size {}, posting early", maxDataBatch);

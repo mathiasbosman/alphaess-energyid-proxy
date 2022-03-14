@@ -22,6 +22,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
+/**
+ * Service to integrate with the AlphaESS API.
+ */
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -54,6 +57,12 @@ public class AlphaessService {
         .toUri();
   }
 
+  /**
+   * Authenticate with the API.
+   *
+   * @param loginDto Used credentials
+   * @return {@link LoginData}
+   */
   public LoginData authenticate(LoginDto loginDto) {
     URI uri = buildUri(alphaessProperties.getEndpoints().getAuthentication());
     log.debug("Authenticating on {}", uri);
@@ -79,6 +88,13 @@ public class AlphaessService {
   }
 
 
+  /**
+   * Gets the AlphaESS statistics for a given serial number on a given day.
+   *
+   * @param serial The serial number
+   * @param date   The date as {@link LocalDateTime}
+   * @return Optional of {@link Statistics}
+   */
   public Optional<Statistics> getDailyStatistics(@NonNull String serial,
       @NonNull LocalDateTime date) {
     URI uri = buildUri(alphaessProperties.getEndpoints().getDailyStats());
