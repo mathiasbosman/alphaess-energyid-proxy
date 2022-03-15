@@ -11,5 +11,5 @@ proxy:
       unit: "kWh"
       readingType: "premarkedInterval"
 energyid:
-  mock: ${ENERGY_ID_MOCK}
+  mock: ${ENERGYID_MOCK}
   secret-url: ${ENERGYID_SECRET_URL}
