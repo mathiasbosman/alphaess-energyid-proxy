@@ -4,11 +4,11 @@
 
 This proxy uses the EnergyID webhook to import data from the AlphaESS battery/inverter.
 
-By default, the cronjob will query for date for the past week up until the day before today.
+By default, the cronjob will query data for the past week up until the day before today.
 
 ## Configuration
 
-Both the connection to the AlphaESS API and the EnergyID webhook need to be configured. If need be
+Both the connection to the AlphaESS API and the EnergyID webhook need to be configured. If needed
 multiple meters can be linked to multiple or singular AlphaESS systems.
 
 ### AlphaESS API
