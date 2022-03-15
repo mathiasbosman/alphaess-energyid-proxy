@@ -28,7 +28,7 @@ public class WebhookAdapterImpl implements EnergyIdWebhookAdapter {
   @Override
   public void postReadings(MeterReadingsDto readingsDto) {
     try {
-      log.info("Posting readings to EnergyId");
+      log.info("Posting {} readings to EnergyId", readingsDto.data().size());
       if (!energyIdProperties.isMock()) {
         HttpEntity<MeterReadingsDto> request = new HttpEntity<>(readingsDto);
         restTemplate.postForLocation(energyIdProperties.getSecretUrl().toURI(), request);
