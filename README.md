@@ -1,6 +1,7 @@
 # AlphaESS to EnergyID proxy
 
 [![Build](https://github.com/mathiasbosman/alphaess-energyid-proxy/actions/workflows/build.yml/badge.svg)](https://github.com/mathiasbosman/alphaess-energyid-proxy/actions/workflows/build.yml)
+[![codecov](https://codecov.io/gh/mathiasbosman/alphaess-energyid-proxy/branch/master/graph/badge.svg?token=VixDPmMsct)](https://codecov.io/gh/mathiasbosman/alphaess-energyid-proxy)
 
 This proxy uses the EnergyID webhook to import data from the AlphaESS battery/inverter.
 
