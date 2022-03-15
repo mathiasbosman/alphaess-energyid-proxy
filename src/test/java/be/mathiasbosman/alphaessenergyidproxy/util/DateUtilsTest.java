@@ -3,6 +3,7 @@ package be.mathiasbosman.alphaessenergyidproxy.util;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.ZoneId;
 import org.junit.jupiter.api.Test;
 
@@ -23,4 +24,17 @@ class DateUtilsTest {
     )).isEqualTo("2020-03-01T00:00:00-08:00");
   }
 
+  @Test
+  void atStartOfDayInZone() {
+    ZoneId brussels = ZoneId.of("Europe/Brussels");
+    LocalDate localDate = LocalDate.now();
+
+    assertThat(DateUtils.atStartOfDayInZone(localDate, brussels))
+        .isInstanceOf(LocalDateTime.class)
+        .satisfies(dateTime -> {
+          assertThat(dateTime.getHour()).isZero();
+          assertThat(dateTime.getMinute()).isZero();
+          assertThat(dateTime.getSecond()).isZero();
+        });
+  }
 }

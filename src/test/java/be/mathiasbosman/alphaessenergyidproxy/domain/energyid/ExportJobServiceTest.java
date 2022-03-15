@@ -58,7 +58,7 @@ class ExportJobServiceTest {
   }
 
   @Test
-  void collectStatisticsForPastWeekDoesNotTriggerPushWhenNoDataIsCollected() {
+  void collectStatisticsDoesNotTriggerPushWhenNoDataIsCollected() {
     when(dataCollector.getPvStatistics(any(), any()))
         .thenReturn(Optional.empty());
 
@@ -73,11 +73,7 @@ class ExportJobServiceTest {
     LocalDate endDate = LocalDate.now();
     LocalDate startDate = endDate.minusDays(dayDiff);
 
-    when(dataCollector.getPvStatistics(any(), any()))
-        .thenReturn(Optional.of(() -> {
-          Random random = new Random();
-          return random.nextDouble();
-        }));
+    mockDataCollector();
 
     exportJobService.collectStatisticsForPeriod(startDate, endDate);
 
@@ -94,14 +90,30 @@ class ExportJobServiceTest {
     LocalDate endDate = LocalDate.now();
     LocalDate startDate = endDate.minusDays(33);
 
+    mockDataCollector();
+
+    exportJobService.collectStatisticsForPeriod(startDate, endDate);
+
+    verify(webhookAdapter, times(proxyProperties.getMeters().size())).postReadings(any());
+  }
+
+  @Test
+  void collectStatisticsForSameDay() {
+    energyIdProperties.setMaxDataBatchSize(0);
+    LocalDate date = LocalDate.now();
+
+    mockDataCollector();
+
+    exportJobService.collectStatisticsForPeriod(date, date);
+
+    verify(webhookAdapter, times(proxyProperties.getMeters().size())).postReadings(any());
+  }
+
+  private void mockDataCollector() {
     when(dataCollector.getPvStatistics(any(), any()))
         .thenReturn(Optional.of(() -> {
           Random random = new Random();
           return random.nextDouble();
         }));
-
-    exportJobService.collectStatisticsForPeriod(startDate, endDate);
-
-    verify(webhookAdapter, times(proxyProperties.getMeters().size())).postReadings(any());
   }
 }
