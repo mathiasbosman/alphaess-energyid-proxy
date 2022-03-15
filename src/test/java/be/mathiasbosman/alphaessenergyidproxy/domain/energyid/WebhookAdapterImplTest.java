@@ -43,10 +43,7 @@ class WebhookAdapterImplTest {
 
   @Test
   void postReadings() throws URISyntaxException {
-    MeterReadingsDto readingsDto = new MeterReadingsDto(
-        "remoteId", "remoteName", "metric", "unit", "readingType",
-        new ArrayList<>()
-    );
+    MeterReadingsDto readingsDto = createMeterReadingsDto();
 
     webhookAdapter.postReadings(readingsDto);
 
@@ -61,6 +58,15 @@ class WebhookAdapterImplTest {
   void postReadingsDoesNotRunWhenMockIsTrue() {
     energyIdProperties.setMock(true);
 
+    webhookAdapter.postReadings(createMeterReadingsDto());
+
     verify(restTemplate, never()).postForLocation(any(), any());
+  }
+
+  private MeterReadingsDto createMeterReadingsDto() {
+    return new MeterReadingsDto(
+        "remoteId", "remoteName", "metric", "unit", "readingType",
+        new ArrayList<>()
+    );
   }
 }
