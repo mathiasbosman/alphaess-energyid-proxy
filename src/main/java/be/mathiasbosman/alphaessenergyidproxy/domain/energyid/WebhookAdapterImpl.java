@@ -27,12 +27,14 @@ public class WebhookAdapterImpl implements EnergyIdWebhookAdapter {
    */
   @Override
   public void postReadings(MeterReadingsDto readingsDto) {
+    boolean isMock = energyIdProperties.isMock();
+    log.info("Posting {} data records to EnergyId (mock={})", readingsDto.data().size(), isMock);
+    if (isMock) {
+      return;
+    }
     try {
-      log.info("Posting {} readings to EnergyId", readingsDto.data().size());
-      if (!energyIdProperties.isMock()) {
-        HttpEntity<MeterReadingsDto> request = new HttpEntity<>(readingsDto);
-        restTemplate.postForLocation(energyIdProperties.getSecretUrl().toURI(), request);
-      }
+      HttpEntity<MeterReadingsDto> request = new HttpEntity<>(readingsDto);
+      restTemplate.postForLocation(energyIdProperties.getSecretUrl().toURI(), request);
       log.info("Readings posted");
     } catch (URISyntaxException e) {
       throw new IllegalStateException("Error forming URI", e);
