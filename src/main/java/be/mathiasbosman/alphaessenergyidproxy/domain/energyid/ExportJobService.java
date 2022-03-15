@@ -1,13 +1,12 @@
 package be.mathiasbosman.alphaessenergyidproxy.domain.energyid;
 
-import be.mathiasbosman.alphaessenergyidproxy.config.EnergyIdProperties;
 import be.mathiasbosman.alphaessenergyidproxy.config.ProxyProperties;
 import be.mathiasbosman.alphaessenergyidproxy.config.ProxyProperties.EnergyIdMeter;
 import be.mathiasbosman.alphaessenergyidproxy.domain.DataCollector;
+import be.mathiasbosman.alphaessenergyidproxy.domain.ExportService;
 import be.mathiasbosman.alphaessenergyidproxy.domain.PvStatistics;
 import be.mathiasbosman.alphaessenergyidproxy.domain.energyid.dto.MeterReadingsDto;
 import be.mathiasbosman.alphaessenergyidproxy.util.DateUtils;
-import be.mathiasbosman.alphaessenergyidproxy.util.StreamUtils;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -25,12 +24,11 @@ import org.springframework.stereotype.Component;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class ExportJobService {
+public class ExportJobService implements ExportService {
 
   private final EnergyIdWebhookAdapter webhookAdapter;
   private final DataCollector dataCollector;
   private final ProxyProperties proxyProperties;
-  private final EnergyIdProperties energyIdProperties;
 
   /**
    * Collects data of the past week and pushes it to the webhook.
@@ -38,32 +36,19 @@ public class ExportJobService {
   @Scheduled(
       cron = "${" + ProxyProperties.PREFIX + ".export-cron}",
       zone = "${" + ProxyProperties.PREFIX + ".timezone}")
-  public void collectStatisticsForPastWeek() {
-    log.info("Job started for collecting statistics of the past week");
+  public void exportStatisticsForPastWeek() {
     LocalDate today = LocalDate.now();
     LocalDate pastWeek = today.minusWeeks(1);
-    collectStatisticsForPeriod(pastWeek, today);
-    log.info("Job ended");
+    List<MeterReadingsDto> readings = collectStatisticsForPeriod(pastWeek, today);
+    readings.stream()
+        .filter(reading -> !reading.data().isEmpty())
+        .forEach(webhookAdapter::postReadings);
   }
 
-  void collectStatisticsForPeriod(LocalDate startDate, LocalDate endDate) {
-    List<MeterReadingsDto> readings = proxyProperties.getMeters().stream()
-        .map(meter -> getReadings(meter, startDate, endDate)).toList();
-
-    readings.forEach(reading -> {
-      List<List<Object>> data = reading.data();
-      StreamUtils.createBatch(data, energyIdProperties.getMaxDataBatchSize())
-          .forEach(dataSet -> webhookAdapter.postReadings(
-              createBatchReadingsDto(reading, dataSet)));
-    });
-  }
-
-  private MeterReadingsDto createBatchReadingsDto(MeterReadingsDto parentDto,
-      List<List<Object>> data) {
-    return new MeterReadingsDto(
-        parentDto.remoteId(), parentDto.remoteName(), parentDto.metric(), parentDto.unit(),
-        parentDto.readingType(), data
-    );
+  List<MeterReadingsDto> collectStatisticsForPeriod(LocalDate startDate, LocalDate endDate) {
+    return proxyProperties.getMeters().stream()
+        .map(meter -> getReadings(meter, startDate, endDate))
+        .toList();
   }
 
   private MeterReadingsDto getReadings(EnergyIdMeter meter, LocalDate startDate,

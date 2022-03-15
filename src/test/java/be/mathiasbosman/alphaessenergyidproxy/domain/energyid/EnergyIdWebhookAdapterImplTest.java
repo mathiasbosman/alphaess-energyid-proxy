@@ -3,6 +3,7 @@ package be.mathiasbosman.alphaessenergyidproxy.domain.energyid;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 import be.mathiasbosman.alphaessenergyidproxy.config.EnergyIdProperties;
@@ -12,6 +13,8 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.IntStream;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -23,12 +26,12 @@ import org.springframework.http.HttpEntity;
 import org.springframework.web.client.RestTemplate;
 
 @ExtendWith(MockitoExtension.class)
-class WebhookAdapterImplTest {
+class EnergyIdWebhookAdapterImplTest {
 
   private final EnergyIdProperties energyIdProperties = new EnergyIdProperties();
   @Mock
   private RestTemplate restTemplate;
-  private WebhookAdapterImpl webhookAdapter;
+  private EnergyIdWebhookAdapterImpl webhookAdapter;
 
   @Captor
   private ArgumentCaptor<URI> uriArgumentCaptor;
@@ -38,16 +41,17 @@ class WebhookAdapterImplTest {
   @BeforeEach
   void initAdapter() throws MalformedURLException {
     energyIdProperties.setSecretUrl(new URL("https://foo/bar"));
-    webhookAdapter = new WebhookAdapterImpl(restTemplate, energyIdProperties);
+    webhookAdapter = new EnergyIdWebhookAdapterImpl(restTemplate, energyIdProperties);
   }
 
   @Test
-  void postReadings() throws URISyntaxException {
-    MeterReadingsDto readingsDto = createMeterReadingsDto();
+  void postSingleBatchReadings() throws URISyntaxException {
+    MeterReadingsDto readingsDto = createMeterReadingsDto(10);
+    energyIdProperties.setMaxDataBatchSize(0);
 
     webhookAdapter.postReadings(readingsDto);
 
-    verify(restTemplate).postForLocation(uriArgumentCaptor.capture(),
+    verify(restTemplate, times(1)).postForLocation(uriArgumentCaptor.capture(),
         httpEntityArgumentCaptor.capture());
 
     assertThat(uriArgumentCaptor.getValue()).isEqualTo(energyIdProperties.getSecretUrl().toURI());
@@ -55,18 +59,32 @@ class WebhookAdapterImplTest {
   }
 
   @Test
+  void postMultipleBatches() {
+    MeterReadingsDto readingsDto = createMeterReadingsDto(24);
+    energyIdProperties.setMaxDataBatchSize(5);
+
+    webhookAdapter.postReadings(readingsDto);
+
+    verify(restTemplate, times(5)).postForLocation(any(), any());
+  }
+
+  @Test
   void postReadingsDoesNotRunWhenMockIsTrue() {
     energyIdProperties.setMock(true);
 
-    webhookAdapter.postReadings(createMeterReadingsDto());
+    webhookAdapter.postReadings(createMeterReadingsDto(1));
 
     verify(restTemplate, never()).postForLocation(any(), any());
   }
 
-  private MeterReadingsDto createMeterReadingsDto() {
+  private MeterReadingsDto createMeterReadingsDto(int amountOfDataRecords) {
+    List<List<Object>> data = new ArrayList<>();
+
+    IntStream intStream = IntStream.rangeClosed(1, amountOfDataRecords);
+    intStream.forEach((a) -> data.add(List.of("foo", "bar")));
     return new MeterReadingsDto(
         "remoteId", "remoteName", "metric", "unit", "readingType",
-        new ArrayList<>()
+        data
     );
   }
 }
