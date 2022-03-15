@@ -2,13 +2,16 @@ package be.mathiasbosman.alphaessenergyidproxy.domain.energyid;
 
 import be.mathiasbosman.alphaessenergyidproxy.config.EnergyIdProperties;
 import be.mathiasbosman.alphaessenergyidproxy.config.ProxyProperties;
+import be.mathiasbosman.alphaessenergyidproxy.config.ProxyProperties.EnergyIdMeter;
 import be.mathiasbosman.alphaessenergyidproxy.domain.DataCollector;
 import be.mathiasbosman.alphaessenergyidproxy.domain.PvStatistics;
 import be.mathiasbosman.alphaessenergyidproxy.domain.energyid.dto.MeterReadingsDto;
 import be.mathiasbosman.alphaessenergyidproxy.util.DateUtils;
+import be.mathiasbosman.alphaessenergyidproxy.util.StreamUtils;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
@@ -44,35 +47,54 @@ public class ExportJobService {
   }
 
   void collectStatisticsForPeriod(LocalDate startDate, LocalDate endDate) {
-    proxyProperties.getMeters().forEach(meter -> {
-      MeterReadingsDto exportDto = MeterReadingsDto.fromEnergyIdMeter(meter);
-      startDate.datesUntil(endDate)
-          .forEach(date -> addStatsForDate(exportDto, meter.getAlphaSn(), date));
-      if (!exportDto.data().isEmpty()) {
-        log.debug("Posting rest of the data");
-        webhookAdapter.postReadings(exportDto);
-      }
+    List<MeterReadingsDto> readings = proxyProperties.getMeters().stream()
+        .map(meter -> getReadings(meter, startDate, endDate)).toList();
+
+    readings.forEach(reading -> {
+      List<List<Object>> data = reading.data();
+      StreamUtils.createBatch(data, energyIdProperties.getMaxDataBatchSize())
+          .forEach(dataSet -> webhookAdapter.postReadings(
+              createBatchReadingsDto(reading, dataSet)));
     });
   }
 
-  private void addStatsForDate(MeterReadingsDto exportDto, String sn, LocalDate pollDate) {
-    ZoneId zoneId = ZoneId.of(proxyProperties.getTimezone());
-    int maxDataBatch = energyIdProperties.getMaxDataBatchSize();
-    LocalDateTime localDateTime = pollDate.atStartOfDay(zoneId).toLocalDateTime();
-    String formattedDate = DateUtils.formatAsIsoDate(localDateTime, zoneId);
-    addStatistics(exportDto, sn, localDateTime, formattedDate);
-    if (maxDataBatch > 0 && exportDto.data().size() == maxDataBatch) {
-      log.warn("Exceeded max data batch size {}, posting early", maxDataBatch);
-      webhookAdapter.postReadings(exportDto);
-      exportDto.data().clear();
-    }
+  private MeterReadingsDto createBatchReadingsDto(MeterReadingsDto parentDto,
+      List<List<Object>> data) {
+    return new MeterReadingsDto(
+        parentDto.remoteId(), parentDto.remoteName(), parentDto.metric(), parentDto.unit(),
+        parentDto.readingType(), data
+    );
   }
 
-  private void addStatistics(MeterReadingsDto readingsDto, String sn, LocalDateTime date,
-      String dataKey) {
-    Optional<PvStatistics> dailyStatistics = dataCollector.getPvStatistics(sn, date);
-    dailyStatistics.ifPresent(
-        stat -> readingsDto.data().add(List.of(dataKey, stat.getPvTotal()))
-    );
+  private MeterReadingsDto getReadings(EnergyIdMeter meter, LocalDate startDate,
+      LocalDate endDate) {
+    MeterReadingsDto meterReading = MeterReadingsDto.fromEnergyIdMeter(meter);
+    String meterId = meter.getAlphaSn();
+    log.debug("Collecting statistics for meter {} between {} and {}", meterId, startDate, endDate);
+    if (startDate.isEqual(endDate)) {
+      log.debug("Start and end date are the same");
+      getReading(meterId, startDate)
+          .ifPresent(data -> meterReading.data().add(data));
+    } else {
+      startDate.datesUntil(endDate)
+          .forEach(date -> getReading(meterId, date)
+              .ifPresent(data -> meterReading.data().add(data)));
+    }
+    return meterReading;
+  }
+
+  private Optional<List<Object>> getReading(String meterId, LocalDate date) {
+    ZoneId zoneId = ZoneId.of(proxyProperties.getTimezone());
+    LocalDateTime timeAtStartOfDay = DateUtils.atStartOfDayInZone(date, zoneId);
+    Optional<PvStatistics> stats = dataCollector.getPvStatistics(meterId, timeAtStartOfDay);
+    List<Object> result = new ArrayList<>();
+
+    stats.ifPresent(stat -> {
+      String formattedIsoDate = DateUtils.formatAsIsoDate(timeAtStartOfDay, zoneId);
+      result.add(formattedIsoDate);
+      result.add(stat.getPvTotal());
+    });
+
+    return !result.isEmpty() ? Optional.of(result) : Optional.empty();
   }
 }
