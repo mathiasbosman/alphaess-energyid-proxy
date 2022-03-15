@@ -14,23 +14,40 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.validation.annotation.Validated;
 
+/**
+ * Configuration properties of the main application.
+ */
 @Data
 @Validated
 @Configuration
 @EnableScheduling
 @ConfigurationProperties(prefix = PREFIX)
 public class ProxyProperties {
+
   public static final String PREFIX = "proxy";
 
+  /**
+   * List of {@link EnergyIdMeter} meters.
+   */
   @NotNull
   private List<EnergyIdMeter> meters;
 
+  /**
+   * Timezone used; Defaults to the default {@link TimeZone}.
+   */
   private String timezone = TimeZone.getDefault().getID();
+  /**
+   * Cron expression for the weekly data query.
+   */
   private String exportCron = "0 50 23 * * ?";
 
+  /**
+   * Energy ID meter properties. See https://api.energyid.eu/docs.html#webhook.
+   */
   @Getter
   @Setter
   public static class EnergyIdMeter {
+
     @NotNull
     private String remoteId;
     @NotNull

@@ -1,11 +1,17 @@
 package be.mathiasbosman.alphaessenergyidproxy.domain.alphaess;
 
 import be.mathiasbosman.alphaessenergyidproxy.config.AlphaessProperties;
+import be.mathiasbosman.alphaessenergyidproxy.domain.DataCollector;
+import be.mathiasbosman.alphaessenergyidproxy.domain.PvStatistics;
+import be.mathiasbosman.alphaessenergyidproxy.domain.alphaess.dto.LoginDto;
+import be.mathiasbosman.alphaessenergyidproxy.domain.alphaess.dto.StatisticsDto;
 import be.mathiasbosman.alphaessenergyidproxy.domain.alphaess.response.LoginResponseEntity;
 import be.mathiasbosman.alphaessenergyidproxy.domain.alphaess.response.LoginResponseEntity.LoginData;
 import be.mathiasbosman.alphaessenergyidproxy.domain.alphaess.response.SticsByPeriodResponseEntity;
 import be.mathiasbosman.alphaessenergyidproxy.domain.alphaess.response.SticsByPeriodResponseEntity.Statistics;
 import java.net.URI;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
@@ -20,10 +26,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
+/**
+ * Service to integrate with the AlphaESS API.
+ */
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class AlphaessService {
+public class AlphaessService implements DataCollector {
 
   private final RestTemplate restTemplate;
   private final AlphaessProperties alphaessProperties;
@@ -52,6 +61,12 @@ public class AlphaessService {
         .toUri();
   }
 
+  /**
+   * Authenticate with the API.
+   *
+   * @param loginDto Used credentials
+   * @return {@link LoginData}
+   */
   public LoginData authenticate(LoginDto loginDto) {
     URI uri = buildUri(alphaessProperties.getEndpoints().getAuthentication());
     log.debug("Authenticating on {}", uri);
@@ -77,10 +92,20 @@ public class AlphaessService {
   }
 
 
-  public Optional<Statistics> getDailyStatistics(@NonNull String serial, @NonNull Date date) {
+  /**
+   * Gets the AlphaESS statistics for a given serial number on a given day.
+   *
+   * @param serial The serial number
+   * @param date   The date as {@link LocalDateTime}
+   * @return Optional of {@link Statistics}
+   */
+  @Override
+  public Optional<PvStatistics> getPvStatistics(@NonNull String serial,
+      @NonNull LocalDateTime date) {
     URI uri = buildUri(alphaessProperties.getEndpoints().getDailyStats());
     log.debug("Getting statistics on {} for {} on {}", uri, serial, date);
-    StatisticsDto statisticsDto = new StatisticsDto(date, date, new Date(), 0, serial, "", true);
+    StatisticsDto statisticsDto = new StatisticsDto(date, date, LocalDate.now(), 0, serial, "",
+        true);
     HttpEntity<StatisticsDto> request = new HttpEntity<>(statisticsDto, buildHeaders(true));
     SticsByPeriodResponseEntity result = restTemplate.postForObject(uri, request,
         SticsByPeriodResponseEntity.class);

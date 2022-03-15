@@ -9,6 +9,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+/**
+ * Login response entity containing the {@link LoginData}.
+ */
 @Getter
 @Setter
 @NoArgsConstructor
@@ -16,6 +19,9 @@ public class LoginResponseEntity extends ResponseEntity {
 
   private LoginData data;
 
+  /**
+   * Data of the authentication response.
+   */
   @Getter
   @Setter
   @Builder

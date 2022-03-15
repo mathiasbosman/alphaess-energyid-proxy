@@ -27,3 +27,4 @@ proxy:
 
 energyid:
   secret-url: "https://hooks.energyid.eu/services/WebhookIn/xxxxxxxx-xxxx-xxxx-xxxx"
+  max-data-batch-size: 100

@@ -7,6 +7,9 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
+/**
+ * Response entity with {@link EssSystemData}.
+ */
 @Getter
 @Setter
 @NoArgsConstructor
@@ -14,11 +17,15 @@ public class EssListResponseEntity extends ResponseEntity {
 
   private List<EssSystemData> data;
 
+  /**
+   * Data of a given EssSystem.
+   */
   @Getter
   @Setter
   @ToString(of = {"sysSn", "sysName", "emsStatus"})
   @NoArgsConstructor
   public static class EssSystemData {
+
     @JsonProperty("sys_sn")
     private String sysSn;
     @JsonProperty("sys_name")

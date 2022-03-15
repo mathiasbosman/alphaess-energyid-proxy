@@ -12,6 +12,9 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.validation.annotation.Validated;
 
+/**
+ * Configuration for the AlphaESS API.
+ */
 @Data
 @Validated
 @Configuration
@@ -24,30 +27,59 @@ public class AlphaessProperties {
 
   public static final String PREFIX = "alphaess";
 
+  /**
+   * Base {@link URL} of the AlphaESS API.
+   */
   @NotNull
   private URL baseUrl;
 
+  /**
+   * All the used {@link Endpoints}.
+   */
   @NotNull
   private Endpoints endpoints;
 
+  /**
+   * {@link Credentials} for the API.
+   */
   @NotNull
   private Credentials credentials;
 
+  /**
+   * Credentials configuration class.
+   */
   @Getter
   @Setter
   public static class Credentials {
 
+    /**
+     * Username of the API user.
+     */
     @NotNull
     private String username;
+    /**
+     * Password of the API user.
+     */
     @NotNull
     private String password;
   }
 
+  /**
+   * Endpoints configuration class.
+   */
   @Getter
   @Setter
   public static class Endpoints {
 
+    /**
+     * Authentication endpoint.
+     */
+    @NotNull
     private String authentication;
+    /**
+     * Daily statistics endpoint.
+     */
+    @NotNull
     private String dailyStats;
   }
 }
