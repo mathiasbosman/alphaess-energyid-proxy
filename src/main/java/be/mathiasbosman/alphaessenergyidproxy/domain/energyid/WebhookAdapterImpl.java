@@ -2,6 +2,7 @@ package be.mathiasbosman.alphaessenergyidproxy.domain.energyid;
 
 import be.mathiasbosman.alphaessenergyidproxy.config.EnergyIdProperties;
 import be.mathiasbosman.alphaessenergyidproxy.domain.energyid.dto.MeterReadingsDto;
+import java.net.URI;
 import java.net.URISyntaxException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -34,7 +35,8 @@ public class WebhookAdapterImpl implements EnergyIdWebhookAdapter {
     }
     try {
       HttpEntity<MeterReadingsDto> request = new HttpEntity<>(readingsDto);
-      restTemplate.postForLocation(energyIdProperties.getSecretUrl().toURI(), request);
+      URI uri = energyIdProperties.getSecretUrl().toURI();
+      restTemplate.postForLocation(uri, request);
       log.info("Readings posted");
     } catch (URISyntaxException e) {
       throw new IllegalStateException("Error forming URI", e);

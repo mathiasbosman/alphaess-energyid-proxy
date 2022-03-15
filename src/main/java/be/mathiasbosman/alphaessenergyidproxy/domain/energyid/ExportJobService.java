@@ -40,9 +40,9 @@ public class ExportJobService {
       zone = "${" + ProxyProperties.PREFIX + ".timezone}")
   public void collectStatisticsForPastWeek() {
     log.info("Job started for collecting statistics of the past week");
-    LocalDate yesterday = LocalDate.now().minusDays(1);
-    LocalDate pastWeek = yesterday.minusWeeks(1);
-    collectStatisticsForPeriod(pastWeek, yesterday);
+    LocalDate today = LocalDate.now();
+    LocalDate pastWeek = today.minusWeeks(1);
+    collectStatisticsForPeriod(pastWeek, today);
     log.info("Job ended");
   }
 
