@@ -36,10 +36,14 @@
           <excludes>
             <!-- main application class -->
             <exclude>**/AlphaEssEnergyIdProxyApplication.class</exclude>
+            <!-- controller -->
+            <exclude>**/controller/**</exclude>
             <!-- jackson classes -->
             <exclude>**/response/**</exclude>
             <!-- configs -->
             <exclude>**/config/**</exclude>
+            <!-- dto's -->
+            <exclude>**/dto/**</exclude>
           </excludes>
         </configuration>
         <executions>

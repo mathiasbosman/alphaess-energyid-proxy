@@ -1,4 +1,4 @@
-package be.mathiasbosman.alphaessenergyidproxy.domain.energyid;
+package be.mathiasbosman.alphaessenergyidproxy.domain.energyid.dto;
 
 import java.time.LocalDateTime;
 

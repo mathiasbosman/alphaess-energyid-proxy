@@ -9,6 +9,8 @@ import static org.mockito.Mockito.when;
 import be.mathiasbosman.alphaessenergyidproxy.config.AlphaessProperties;
 import be.mathiasbosman.alphaessenergyidproxy.config.AlphaessProperties.Credentials;
 import be.mathiasbosman.alphaessenergyidproxy.config.AlphaessProperties.Endpoints;
+import be.mathiasbosman.alphaessenergyidproxy.domain.PvStatistics;
+import be.mathiasbosman.alphaessenergyidproxy.domain.alphaess.dto.LoginDto;
 import be.mathiasbosman.alphaessenergyidproxy.domain.alphaess.response.LoginResponseEntity;
 import be.mathiasbosman.alphaessenergyidproxy.domain.alphaess.response.LoginResponseEntity.LoginData;
 import be.mathiasbosman.alphaessenergyidproxy.domain.alphaess.response.SticsByPeriodResponseEntity;
@@ -38,7 +40,7 @@ class AlphaessServiceTest {
   private AlphaessService alphaessService;
 
   @BeforeEach
-  void initProps() throws MalformedURLException {
+  void initService() throws MalformedURLException {
     alphaessProperties.setBaseUrl(new URL("https://foo"));
     endpoints.setAuthentication("/auth");
     endpoints.setDailyStats("/stats");
@@ -89,13 +91,13 @@ class AlphaessServiceTest {
   void getDailyStatics() {
     mockAuth();
     SticsByPeriodResponseEntity response = new SticsByPeriodResponseEntity();
-    response.setData(Statistics.builder().feedIn(50).build());
+    response.setData(Statistics.builder().pvTotal(50).build());
     when(restTemplate.postForObject(any(), any(), eq(SticsByPeriodResponseEntity.class)))
         .thenReturn(response);
 
-    Optional<Statistics> stats = alphaessService.getDailyStatistics("sn", LocalDateTime.now());
+    Optional<PvStatistics> stats = alphaessService.getPvStatistics("sn", LocalDateTime.now());
     assertThat(stats).isNotEmpty();
-    assertThat(stats.get().getFeedIn()).isEqualTo(50);
+    assertThat(stats.get().getPvTotal()).isEqualTo(50);
   }
 
   @Test
@@ -104,7 +106,7 @@ class AlphaessServiceTest {
     when(restTemplate.postForObject(any(), any(), eq(SticsByPeriodResponseEntity.class)))
         .thenReturn(null);
 
-    assertThat(alphaessService.getDailyStatistics("123", LocalDateTime.now())).isEmpty();
+    assertThat(alphaessService.getPvStatistics("123", LocalDateTime.now())).isEmpty();
   }
 
   private LoginData mockAuth() {

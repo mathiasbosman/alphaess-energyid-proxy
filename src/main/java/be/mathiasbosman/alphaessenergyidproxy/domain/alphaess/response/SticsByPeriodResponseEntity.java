@@ -1,5 +1,6 @@
 package be.mathiasbosman.alphaessenergyidproxy.domain.alphaess.response;
 
+import be.mathiasbosman.alphaessenergyidproxy.domain.PvStatistics;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
@@ -29,7 +30,7 @@ public class SticsByPeriodResponseEntity extends ResponseEntity {
   @AllArgsConstructor
   @NoArgsConstructor
   @JsonIgnoreProperties(ignoreUnknown = true)
-  public static class Statistics {
+  public static class Statistics implements PvStatistics {
 
     /**
      * Total PV input.

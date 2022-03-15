@@ -1,4 +1,4 @@
-package be.mathiasbosman.alphaessenergyidproxy.domain.alphaess;
+package be.mathiasbosman.alphaessenergyidproxy.domain.alphaess.dto;
 
 import be.mathiasbosman.alphaessenergyidproxy.config.AlphaessProperties.Credentials;
 

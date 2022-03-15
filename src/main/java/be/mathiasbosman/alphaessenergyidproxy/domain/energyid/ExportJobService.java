@@ -2,15 +2,15 @@ package be.mathiasbosman.alphaessenergyidproxy.domain.energyid;
 
 import be.mathiasbosman.alphaessenergyidproxy.config.EnergyIdProperties;
 import be.mathiasbosman.alphaessenergyidproxy.config.ProxyProperties;
-import be.mathiasbosman.alphaessenergyidproxy.domain.alphaess.AlphaessService;
-import be.mathiasbosman.alphaessenergyidproxy.domain.alphaess.response.SticsByPeriodResponseEntity.Statistics;
+import be.mathiasbosman.alphaessenergyidproxy.domain.DataCollector;
+import be.mathiasbosman.alphaessenergyidproxy.domain.PvStatistics;
+import be.mathiasbosman.alphaessenergyidproxy.domain.energyid.dto.MeterReadingsDto;
 import be.mathiasbosman.alphaessenergyidproxy.util.DateUtils;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.List;
 import java.util.Optional;
-import javax.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -24,15 +24,10 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class ExportJobService {
 
-  private final WebhookAdapter webhookAdapter;
-  private final AlphaessService alphaessService;
+  private final EnergyIdWebhookAdapter webhookAdapter;
+  private final DataCollector dataCollector;
   private final ProxyProperties proxyProperties;
   private final EnergyIdProperties energyIdProperties;
-
-  @PostConstruct
-  public void logInfo() {
-    log.debug("EnergyID properties: {}", energyIdProperties);
-  }
 
   /**
    * Collects data of the past week and pushes it to the webhook.
@@ -48,12 +43,13 @@ public class ExportJobService {
     log.info("Job ended");
   }
 
-  private void collectStatisticsForPeriod(LocalDate startDate, LocalDate endDate) {
+  void collectStatisticsForPeriod(LocalDate startDate, LocalDate endDate) {
     proxyProperties.getMeters().forEach(meter -> {
       MeterReadingsDto exportDto = MeterReadingsDto.fromEnergyIdMeter(meter);
       startDate.datesUntil(endDate)
           .forEach(date -> addStatsForDate(exportDto, meter.getAlphaSn(), date));
       if (!exportDto.data().isEmpty()) {
+        log.debug("Posting rest of the data");
         webhookAdapter.postReadings(exportDto);
       }
     });
@@ -65,7 +61,7 @@ public class ExportJobService {
     LocalDateTime localDateTime = pollDate.atStartOfDay(zoneId).toLocalDateTime();
     String formattedDate = DateUtils.formatAsIsoDate(localDateTime, zoneId);
     addStatistics(exportDto, sn, localDateTime, formattedDate);
-    if (exportDto.data().size() == maxDataBatch) {
+    if (maxDataBatch > 0 && exportDto.data().size() == maxDataBatch) {
       log.warn("Exceeded max data batch size {}, posting early", maxDataBatch);
       webhookAdapter.postReadings(exportDto);
       exportDto.data().clear();
@@ -74,7 +70,7 @@ public class ExportJobService {
 
   private void addStatistics(MeterReadingsDto readingsDto, String sn, LocalDateTime date,
       String dataKey) {
-    Optional<Statistics> dailyStatistics = alphaessService.getDailyStatistics(sn, date);
+    Optional<PvStatistics> dailyStatistics = dataCollector.getPvStatistics(sn, date);
     dailyStatistics.ifPresent(
         stat -> readingsDto.data().add(List.of(dataKey, stat.getPvTotal()))
     );

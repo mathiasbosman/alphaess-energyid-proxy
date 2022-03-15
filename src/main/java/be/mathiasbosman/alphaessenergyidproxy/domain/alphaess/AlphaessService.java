@@ -1,6 +1,10 @@
 package be.mathiasbosman.alphaessenergyidproxy.domain.alphaess;
 
 import be.mathiasbosman.alphaessenergyidproxy.config.AlphaessProperties;
+import be.mathiasbosman.alphaessenergyidproxy.domain.DataCollector;
+import be.mathiasbosman.alphaessenergyidproxy.domain.PvStatistics;
+import be.mathiasbosman.alphaessenergyidproxy.domain.alphaess.dto.LoginDto;
+import be.mathiasbosman.alphaessenergyidproxy.domain.alphaess.dto.StatisticsDto;
 import be.mathiasbosman.alphaessenergyidproxy.domain.alphaess.response.LoginResponseEntity;
 import be.mathiasbosman.alphaessenergyidproxy.domain.alphaess.response.LoginResponseEntity.LoginData;
 import be.mathiasbosman.alphaessenergyidproxy.domain.alphaess.response.SticsByPeriodResponseEntity;
@@ -28,7 +32,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class AlphaessService {
+public class AlphaessService implements DataCollector {
 
   private final RestTemplate restTemplate;
   private final AlphaessProperties alphaessProperties;
@@ -95,7 +99,8 @@ public class AlphaessService {
    * @param date   The date as {@link LocalDateTime}
    * @return Optional of {@link Statistics}
    */
-  public Optional<Statistics> getDailyStatistics(@NonNull String serial,
+  @Override
+  public Optional<PvStatistics> getPvStatistics(@NonNull String serial,
       @NonNull LocalDateTime date) {
     URI uri = buildUri(alphaessProperties.getEndpoints().getDailyStats());
     log.debug("Getting statistics on {} for {} on {}", uri, serial, date);

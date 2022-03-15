@@ -1,7 +1,8 @@
 package be.mathiasbosman.alphaessenergyidproxy.domain.energyid;
 
 import be.mathiasbosman.alphaessenergyidproxy.config.EnergyIdProperties;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import be.mathiasbosman.alphaessenergyidproxy.domain.energyid.dto.MeterReadingsDto;
+import java.net.URISyntaxException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpEntity;
@@ -14,9 +15,8 @@ import org.springframework.web.client.RestTemplate;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class WebhookAdapter {
+public class WebhookAdapterImpl implements EnergyIdWebhookAdapter {
 
-  private final ObjectMapper mapper;
   private final RestTemplate restTemplate;
   private final EnergyIdProperties energyIdProperties;
 
@@ -25,17 +25,17 @@ public class WebhookAdapter {
    *
    * @param readingsDto {@link MeterReadingsDto} to post
    */
+  @Override
   public void postReadings(MeterReadingsDto readingsDto) {
     try {
       log.info("Posting readings to EnergyId");
-      log.debug("Body: {}", mapper.writeValueAsString(readingsDto));
       if (!energyIdProperties.isMock()) {
         HttpEntity<MeterReadingsDto> request = new HttpEntity<>(readingsDto);
         restTemplate.postForLocation(energyIdProperties.getSecretUrl().toURI(), request);
       }
       log.info("Readings posted");
-    } catch (Exception e) {
-      log.error("Exception while posting data", e);
+    } catch (URISyntaxException e) {
+      throw new IllegalStateException("Error forming URI", e);
     }
   }
 }
