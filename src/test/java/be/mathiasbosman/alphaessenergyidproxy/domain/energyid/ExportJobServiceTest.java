@@ -1,15 +1,16 @@
 package be.mathiasbosman.alphaessenergyidproxy.domain.energyid;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import be.mathiasbosman.alphaessenergyidproxy.config.EnergyIdProperties;
 import be.mathiasbosman.alphaessenergyidproxy.config.ProxyProperties;
 import be.mathiasbosman.alphaessenergyidproxy.config.ProxyProperties.EnergyIdMeter;
 import be.mathiasbosman.alphaessenergyidproxy.domain.DataCollector;
+import be.mathiasbosman.alphaessenergyidproxy.domain.energyid.dto.MeterReadingsDto;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
@@ -23,9 +24,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 class ExportJobServiceTest {
 
-  private static final int maxBatchSize = 5;
   private final ProxyProperties proxyProperties = new ProxyProperties();
-  private final EnergyIdProperties energyIdProperties = new EnergyIdProperties();
   @Mock
   private EnergyIdWebhookAdapter webhookAdapter;
   @Mock
@@ -34,7 +33,6 @@ class ExportJobServiceTest {
 
   @BeforeEach
   void initService() {
-    energyIdProperties.setMaxDataBatchSize(maxBatchSize);
     proxyProperties.setMeters(List.of(
         createEnergyIdMeter("sn1"),
         createEnergyIdMeter("sn2")
@@ -42,8 +40,7 @@ class ExportJobServiceTest {
     exportJobService = new ExportJobService(
         webhookAdapter,
         dataCollector,
-        proxyProperties,
-        energyIdProperties);
+        proxyProperties);
   }
 
   private EnergyIdMeter createEnergyIdMeter(String alphaSn) {
@@ -58,55 +55,49 @@ class ExportJobServiceTest {
   }
 
   @Test
-  void collectStatisticsDoesNotTriggerPushWhenNoDataIsCollected() {
+  void exportJobDoesNotTriggerPushWhenNoDataIsCollected() {
     when(dataCollector.getPvStatistics(any(), any()))
         .thenReturn(Optional.empty());
 
-    exportJobService.collectStatisticsForPastWeek();
+    exportJobService.exportStatisticsForPastWeek();
 
     verify(webhookAdapter, never()).postReadings(any());
   }
 
   @Test
-  void collectStatisticsTriggersMultipleBatchesIfNeeded() {
-    int dayDiff = 12;
-    LocalDate endDate = LocalDate.now();
-    LocalDate startDate = endDate.minusDays(dayDiff);
-
+  void exportStatisticsForPastWeekJob() {
     mockDataCollector();
 
-    exportJobService.collectStatisticsForPeriod(startDate, endDate);
-
-    // 12 days => 24 records => 2 batches of 5 + 1 of 4
-    int fullBatchesPerMeter = dayDiff / maxBatchSize;
-    int batchesPerMeter = fullBatchesPerMeter + 1; // always rest records because of the 12 days
-    int expectedAmountOfPosts = proxyProperties.getMeters().size() * batchesPerMeter;
-    verify(webhookAdapter, times(expectedAmountOfPosts)).postReadings(any());
-  }
-
-  @Test
-  void collectStatisticsInOneBatchIfBatchSizeSetToZero() {
-    energyIdProperties.setMaxDataBatchSize(0);
-    LocalDate endDate = LocalDate.now();
-    LocalDate startDate = endDate.minusDays(33);
-
-    mockDataCollector();
-
-    exportJobService.collectStatisticsForPeriod(startDate, endDate);
+    exportJobService.exportStatisticsForPastWeek();
 
     verify(webhookAdapter, times(proxyProperties.getMeters().size())).postReadings(any());
   }
 
   @Test
   void collectStatisticsForSameDay() {
-    energyIdProperties.setMaxDataBatchSize(0);
     LocalDate date = LocalDate.now();
+    mockDataCollector();
+
+    List<MeterReadingsDto> data = exportJobService.collectStatisticsForPeriod(date, date);
+
+    assertThat(data).hasSize(proxyProperties.getMeters().size());
+  }
+
+  @Test
+  void collectStatisticsForPeriod() {
+    int dayDiff = 12;
+    LocalDate endDate = LocalDate.now();
+    LocalDate startDate = endDate.minusDays(dayDiff);
 
     mockDataCollector();
 
-    exportJobService.collectStatisticsForPeriod(date, date);
+    List<MeterReadingsDto> data = exportJobService.collectStatisticsForPeriod(startDate, endDate);
 
-    verify(webhookAdapter, times(proxyProperties.getMeters().size())).postReadings(any());
+    assertThat(data)
+        .hasSize(2)
+        .satisfies(meterReadingsDto ->
+            meterReadingsDto.forEach(reading -> assertThat(reading.data()).hasSize(12))
+        );
   }
 
   private void mockDataCollector() {

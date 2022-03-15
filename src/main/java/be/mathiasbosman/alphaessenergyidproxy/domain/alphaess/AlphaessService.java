@@ -69,7 +69,7 @@ public class AlphaessService implements DataCollector {
    */
   public LoginData authenticate(LoginDto loginDto) {
     URI uri = buildUri(alphaessProperties.getEndpoints().getAuthentication());
-    log.debug("Authenticating on {}", uri);
+    log.trace("Authenticating on {}", uri);
     HttpEntity<LoginDto> request = new HttpEntity<>(loginDto, buildHeaders(false));
     LoginResponseEntity responseEntity = restTemplate.postForObject(uri, request,
         LoginResponseEntity.class);
@@ -103,7 +103,7 @@ public class AlphaessService implements DataCollector {
   public Optional<PvStatistics> getPvStatistics(@NonNull String serial,
       @NonNull LocalDateTime date) {
     URI uri = buildUri(alphaessProperties.getEndpoints().getDailyStats());
-    log.debug("Getting statistics on {} for {} on {}", uri, serial, date);
+    log.trace("Getting statistics on {} for {} on {}", uri, serial, date);
     StatisticsDto statisticsDto = new StatisticsDto(date, date, LocalDate.now(), 0, serial, "",
         true);
     HttpEntity<StatisticsDto> request = new HttpEntity<>(statisticsDto, buildHeaders(true));
