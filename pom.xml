@@ -10,7 +10,7 @@
     <relativePath/> <!-- lookup parent from repository -->
   </parent>
   <groupId>be.mathiasbosman</groupId>
-  <artifactId>converter-data-export</artifactId>
+  <artifactId>solar-inverter-data-export</artifactId>
   <build>
     <plugins>
       <plugin>
@@ -35,7 +35,7 @@
         <configuration>
           <excludes>
             <!-- main application class -->
-            <exclude>**/ConverterDataExportApplication.class</exclude>
+            <exclude>**/InverterDataExportApplication.class</exclude>
             <!-- controller -->
             <exclude>**/*Controller.*</exclude>
             <!-- jackson classes -->
@@ -65,8 +65,8 @@
       </plugin>
     </plugins>
   </build>
-  <description>Export application for converter data</description>
-  <name>converter-data-export</name>
+  <description>Export application for solar inverter data</description>
+  <name>solar-inverter-data-export</name>
   <properties>
     <java.version>17</java.version>
   </properties>
