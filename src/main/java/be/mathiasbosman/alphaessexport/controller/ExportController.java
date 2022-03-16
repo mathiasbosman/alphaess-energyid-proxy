@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/rest")
-public class ProxyController {
+public class ExportController {
 
   private final DataCollector dataCollector;
   private final ExportService exportService;
