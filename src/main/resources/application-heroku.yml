@@ -6,7 +6,7 @@ energyid:
   mock: ${ENERGYID_MOCK}
   secret-url: ${ENERGYID_SECRET_URL}
   meters:
-    - converterId: ${ALPHAESS_SN}
+    - inverterId: ${ALPHAESS_SN}
       remoteId: "solarAlphaEss"
       remoteName: "solarAlphaEss"
       metric: "solarPhotovoltaicProduction"
