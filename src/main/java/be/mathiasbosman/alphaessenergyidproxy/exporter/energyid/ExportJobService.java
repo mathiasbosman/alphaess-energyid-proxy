@@ -1,11 +1,12 @@
-package be.mathiasbosman.alphaessenergyidproxy.domain.energyid;
+package be.mathiasbosman.alphaessenergyidproxy.exporter.energyid;
 
+import be.mathiasbosman.alphaessenergyidproxy.config.AlphaessProperties;
 import be.mathiasbosman.alphaessenergyidproxy.config.ProxyProperties;
-import be.mathiasbosman.alphaessenergyidproxy.config.ProxyProperties.EnergyIdMeter;
 import be.mathiasbosman.alphaessenergyidproxy.domain.DataCollector;
 import be.mathiasbosman.alphaessenergyidproxy.domain.ExportService;
 import be.mathiasbosman.alphaessenergyidproxy.domain.PvStatistics;
-import be.mathiasbosman.alphaessenergyidproxy.domain.energyid.dto.MeterReadingsDto;
+import be.mathiasbosman.alphaessenergyidproxy.exporter.energyid.EnergyIdProperties.EnergyIdMeter;
+import be.mathiasbosman.alphaessenergyidproxy.exporter.energyid.dto.MeterReadingsDto;
 import be.mathiasbosman.alphaessenergyidproxy.util.DateUtils;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -28,7 +29,8 @@ public class ExportJobService implements ExportService {
 
   private final EnergyIdWebhookAdapter webhookAdapter;
   private final DataCollector dataCollector;
-  private final ProxyProperties proxyProperties;
+  private final EnergyIdProperties energyIdProperties;
+  private final AlphaessProperties alphaessProperties;
 
   /**
    * Collects data of the past week and pushes it to the webhook.
@@ -46,7 +48,7 @@ public class ExportJobService implements ExportService {
   }
 
   List<MeterReadingsDto> collectStatisticsForPeriod(LocalDate startDate, LocalDate endDate) {
-    return proxyProperties.getMeters().stream()
+    return energyIdProperties.getMeters().stream()
         .map(meter -> getReadings(meter, startDate, endDate))
         .toList();
   }
@@ -69,7 +71,7 @@ public class ExportJobService implements ExportService {
   }
 
   private Optional<List<Object>> getReading(String meterId, LocalDate date) {
-    ZoneId zoneId = ZoneId.of(proxyProperties.getTimezone());
+    ZoneId zoneId = ZoneId.of(alphaessProperties.getTimezone());
     LocalDateTime timeAtStartOfDay = DateUtils.atStartOfDayInZone(date, zoneId);
     Optional<PvStatistics> stats = dataCollector.getPvStatistics(meterId, timeAtStartOfDay);
     List<Object> result = new ArrayList<>();

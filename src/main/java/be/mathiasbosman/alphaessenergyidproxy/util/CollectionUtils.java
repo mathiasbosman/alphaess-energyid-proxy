@@ -10,7 +10,7 @@ import lombok.experimental.UtilityClass;
  * Utils for streams.
  */
 @UtilityClass
-public class StreamUtils {
+public class CollectionUtils {
 
   /**
    * Splits input list in batches. If size of batch is null or zero the whole list will be
@@ -21,7 +21,7 @@ public class StreamUtils {
    * @param <T>       Type of list objects
    * @return Collections of batches
    */
-  public static <T> Collection<List<T>> createBatch(List<T> inputList, Integer batchSize) {
+  public static <T> Collection<List<T>> split(Collection<T> inputList, Integer batchSize) {
     AtomicInteger counter = new AtomicInteger();
     int groupSize = batchSize != null && batchSize > 0 ? batchSize : inputList.size();
     return inputList.stream()

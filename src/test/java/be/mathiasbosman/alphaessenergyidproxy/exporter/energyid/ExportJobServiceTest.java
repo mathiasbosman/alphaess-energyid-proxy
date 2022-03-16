@@ -1,4 +1,4 @@
-package be.mathiasbosman.alphaessenergyidproxy.domain.energyid;
+package be.mathiasbosman.alphaessenergyidproxy.exporter.energyid;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -7,10 +7,10 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import be.mathiasbosman.alphaessenergyidproxy.config.ProxyProperties;
-import be.mathiasbosman.alphaessenergyidproxy.config.ProxyProperties.EnergyIdMeter;
+import be.mathiasbosman.alphaessenergyidproxy.config.AlphaessProperties;
 import be.mathiasbosman.alphaessenergyidproxy.domain.DataCollector;
-import be.mathiasbosman.alphaessenergyidproxy.domain.energyid.dto.MeterReadingsDto;
+import be.mathiasbosman.alphaessenergyidproxy.exporter.energyid.EnergyIdProperties.EnergyIdMeter;
+import be.mathiasbosman.alphaessenergyidproxy.exporter.energyid.dto.MeterReadingsDto;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
@@ -24,23 +24,25 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 class ExportJobServiceTest {
 
-  private final ProxyProperties proxyProperties = new ProxyProperties();
   @Mock
   private EnergyIdWebhookAdapter webhookAdapter;
   @Mock
   private DataCollector dataCollector;
   private ExportJobService exportJobService;
+  private final EnergyIdProperties energyIdProperties = new EnergyIdProperties();
+  private final AlphaessProperties alphaessProperties = new AlphaessProperties();
 
   @BeforeEach
   void initService() {
-    proxyProperties.setMeters(List.of(
+    energyIdProperties.setMeters(List.of(
         createEnergyIdMeter("sn1"),
         createEnergyIdMeter("sn2")
     ));
     exportJobService = new ExportJobService(
         webhookAdapter,
         dataCollector,
-        proxyProperties);
+        energyIdProperties,
+        alphaessProperties);
   }
 
   private EnergyIdMeter createEnergyIdMeter(String alphaSn) {
@@ -70,7 +72,7 @@ class ExportJobServiceTest {
 
     exportJobService.exportStatisticsForPastWeek();
 
-    verify(webhookAdapter, times(proxyProperties.getMeters().size())).postReadings(any());
+    verify(webhookAdapter, times(energyIdProperties.getMeters().size())).postReadings(any());
   }
 
   @Test
@@ -80,7 +82,7 @@ class ExportJobServiceTest {
 
     List<MeterReadingsDto> data = exportJobService.collectStatisticsForPeriod(date, date);
 
-    assertThat(data).hasSize(proxyProperties.getMeters().size());
+    assertThat(data).hasSize(energyIdProperties.getMeters().size());
   }
 
   @Test

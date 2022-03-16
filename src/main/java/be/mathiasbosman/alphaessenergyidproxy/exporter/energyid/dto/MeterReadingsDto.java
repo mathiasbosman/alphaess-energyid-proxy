@@ -1,6 +1,6 @@
-package be.mathiasbosman.alphaessenergyidproxy.domain.energyid.dto;
+package be.mathiasbosman.alphaessenergyidproxy.exporter.energyid.dto;
 
-import be.mathiasbosman.alphaessenergyidproxy.config.ProxyProperties.EnergyIdMeter;
+import be.mathiasbosman.alphaessenergyidproxy.exporter.energyid.EnergyIdProperties.EnergyIdMeter;
 import java.util.ArrayList;
 import java.util.List;
 

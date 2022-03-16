@@ -1,4 +1,4 @@
-package be.mathiasbosman.alphaessenergyidproxy.domain.energyid;
+package be.mathiasbosman.alphaessenergyidproxy.exporter.energyid;
 
 import java.net.URI;
 import org.springframework.http.HttpEntity;

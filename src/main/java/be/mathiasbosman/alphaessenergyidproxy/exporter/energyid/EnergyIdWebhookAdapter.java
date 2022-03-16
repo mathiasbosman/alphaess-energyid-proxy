@@ -1,6 +1,6 @@
-package be.mathiasbosman.alphaessenergyidproxy.domain.energyid;
+package be.mathiasbosman.alphaessenergyidproxy.exporter.energyid;
 
-import be.mathiasbosman.alphaessenergyidproxy.domain.energyid.dto.MeterReadingsDto;
+import be.mathiasbosman.alphaessenergyidproxy.exporter.energyid.dto.MeterReadingsDto;
 
 /**
  * Interface for the EnergyID webhook.

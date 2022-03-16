@@ -2,7 +2,9 @@ alphaess:
   credentials:
     username: ${ALPHAESS_USERNAME}
     password: ${ALPHAESS_PASSWORD}
-proxy:
+energyid:
+  mock: ${ENERGYID_MOCK}
+  secret-url: ${ENERGYID_SECRET_URL}
   meters:
     - alphaSn: ${ALPHAESS_SN}
       remoteId: "solarAlphaEss"
@@ -10,6 +12,3 @@ proxy:
       metric: "solarPhotovoltaicProduction"
       unit: "kWh"
       readingType: "premarkedInterval"
-energyid:
-  mock: ${ENERGYID_MOCK}
-  secret-url: ${ENERGYID_SECRET_URL}

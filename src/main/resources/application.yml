@@ -13,10 +13,14 @@ alphaess:
   credentials:
     username: "foo"
     password: "bar"
+  timezone: "Europe/Brussels"
 
 proxy:
-  timezone: "Europe/Brussels"
   export-cron: "0 50 23 * * ?"
+
+energyid:
+  secret-url: "https://hooks.energyid.eu/services/WebhookIn/xxxxxxxx-xxxx-xxxx-xxxx"
+  max-data-batch-size: 100
   meters:
     - alphaSn: "FOO_BAR"
       remoteId: "FOO_BAR"
@@ -24,7 +28,3 @@ proxy:
       metric: "solarPhotovoltaicProduction"
       unit: "kWh"
       readingType: "premarkedInterval"
-
-energyid:
-  secret-url: "https://hooks.energyid.eu/services/WebhookIn/xxxxxxxx-xxxx-xxxx-xxxx"
-  max-data-batch-size: 100

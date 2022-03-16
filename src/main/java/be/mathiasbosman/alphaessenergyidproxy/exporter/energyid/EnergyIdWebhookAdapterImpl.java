@@ -1,8 +1,7 @@
-package be.mathiasbosman.alphaessenergyidproxy.domain.energyid;
+package be.mathiasbosman.alphaessenergyidproxy.exporter.energyid;
 
-import be.mathiasbosman.alphaessenergyidproxy.config.EnergyIdProperties;
-import be.mathiasbosman.alphaessenergyidproxy.domain.energyid.dto.MeterReadingsDto;
-import be.mathiasbosman.alphaessenergyidproxy.util.StreamUtils;
+import be.mathiasbosman.alphaessenergyidproxy.exporter.energyid.dto.MeterReadingsDto;
+import be.mathiasbosman.alphaessenergyidproxy.util.CollectionUtils;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
@@ -13,7 +12,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 /**
- * Adapter to interact with the EnergyID webhook.
+ * Adapter to interact with the EnergyID webhook. EnergyID only allows a certain amount of data
+ * points per post. Make sure to configure it as needed. If set the data will be split into batches
+ * if it exceeds the maximum amount.
+ * <p>
+ * For more information check https://api.energyid.eu/docs.html#webhook.
  */
 @Slf4j
 @Service
@@ -46,7 +49,7 @@ public class EnergyIdWebhookAdapterImpl implements EnergyIdWebhookAdapter {
 
   private void postBatchedReadings(MeterReadingsDto parentDto) {
     List<List<Object>> data = parentDto.data();
-    StreamUtils.createBatch(data, energyIdProperties.getMaxDataBatchSize())
+    CollectionUtils.split(data, energyIdProperties.getMaxDataBatchSize())
         .forEach(batch -> postSingleBatchReadings(parentDto, batch));
   }
 

@@ -3,6 +3,7 @@ package be.mathiasbosman.alphaessenergyidproxy.config;
 import static be.mathiasbosman.alphaessenergyidproxy.config.AlphaessProperties.PREFIX;
 
 import java.net.URL;
+import java.util.TimeZone;
 import javax.validation.constraints.NotNull;
 import lombok.Data;
 import lombok.Getter;
@@ -26,6 +27,11 @@ public class AlphaessProperties {
   public static final String DATE_TIME_FORMAT_PATTERN = "yyyy-MM-dd HH:mm:ss";
 
   public static final String PREFIX = "alphaess";
+
+  /**
+   * Timezone used; Defaults to the default {@link TimeZone}.
+   */
+  private String timezone = TimeZone.getDefault().getID();
 
   /**
    * Base {@link URL} of the AlphaESS API.

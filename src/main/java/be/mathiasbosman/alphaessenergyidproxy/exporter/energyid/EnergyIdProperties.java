@@ -1,10 +1,13 @@
-package be.mathiasbosman.alphaessenergyidproxy.config;
+package be.mathiasbosman.alphaessenergyidproxy.exporter.energyid;
 
-import static be.mathiasbosman.alphaessenergyidproxy.config.EnergyIdProperties.PREFIX;
+import static be.mathiasbosman.alphaessenergyidproxy.exporter.energyid.EnergyIdProperties.PREFIX;
 
 import java.net.URL;
+import java.util.List;
 import javax.validation.constraints.NotNull;
 import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.EnableScheduling;
@@ -28,6 +31,12 @@ public class EnergyIdProperties {
   @NotNull
   private URL secretUrl;
 
+  /**
+   * List of {@link EnergyIdMeter} meters.
+   */
+  @NotNull
+  private List<EnergyIdMeter> meters;
+
   private boolean mock = false;
 
   /**
@@ -35,5 +44,27 @@ public class EnergyIdProperties {
    */
   @NotNull
   private int maxDataBatchSize;
+
+  /**
+   * Energy ID meter properties. See https://api.energyid.eu/docs.html#webhook.
+   */
+  @Getter
+  @Setter
+  public static class EnergyIdMeter {
+
+    @NotNull
+    private String remoteId;
+    @NotNull
+    private String remoteName;
+    @NotNull
+    private String metric;
+    @NotNull
+    private String unit;
+    @NotNull
+    private String readingType;
+    private double multiplier = 1;
+    @NotNull
+    private String alphaSn;
+  }
 
 }
