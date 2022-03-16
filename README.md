@@ -1,66 +1,56 @@
-# AlphaESS to EnergyID proxy
+# Converter data exporter
 
-[![Build](https://github.com/mathiasbosman/alphaess-energyid-proxy/actions/workflows/build.yml/badge.svg)](https://github.com/mathiasbosman/alphaess-energyid-proxy/actions/workflows/build.yml)
-[![codecov](https://codecov.io/gh/mathiasbosman/alphaess-energyid-proxy/branch/master/graph/badge.svg?token=VixDPmMsct)](https://codecov.io/gh/mathiasbosman/alphaess-energyid-proxy)
+[![Build](https://github.com/mathiasbosman/converter-data-export/actions/workflows/build.yml/badge.svg)](https://github.com/mathiasbosman/alphaess-energyid-proxy/actions/workflows/build.yml)
+[![codecov](https://codecov.io/gh/mathiasbosman/converter-data-export/branch/master/graph/badge.svg?token=VixDPmMsct)](https://codecov.io/gh/mathiasbosman/alphaess-energyid-proxy)
 
-This proxy uses the EnergyID webhook to import data from the AlphaESS battery/inverter.
+This application allows the export of data from a converter.
 
-By default, the cronjob will query data for the past week up until the day before today.
+Currently, only one the [AlphaESS](https://www.alpha-ess.com) converter (battery) is supported.
+
+Exporting is currently only supported to the [EnergyID](https://energyid.eu) platform.
 
 ## Configuration
 
-Both the connection to the AlphaESS API and the EnergyID webhook need to be configured. If needed
-multiple meters can be linked to multiple or singular AlphaESS systems.
+Depending on the needs of the data collectors and exporters different configuration is required.
 
-### AlphaESS API
+### Data collectors
 
-To connect to the AlphaESS you need to set your username and password:
+#### AlphaESS API
+
+To connect to the AlphaESS you need to set your user credentials, the timezone the converter runs in
+and the API endpoints.
 
 ```yaml
 alphaess:
+  base-url: "https://www.alphaess.com/api"
+  endpoints:
+    authentication: "/Account/Login"
+    daily-stats: "/Power/SticsByPeriod"
   credentials:
-    username: "JohnDoe"
-    password: "Area51"
+    username: "foo"
+    password: "bar"
+  timezone: "Europe/Brussels"
 ```
 
-### EnergyID (webhook)
+### Exporters
 
-To connect the EnergyID webhook you need the provided secret url and set it as such:
+#### EnergyID (webhook)
+
+To connect the EnergyID webhook you need the provided secret url and set it as such. In addition,
+set the maximum batch size.
+
+This is also the place to configure your meters in EnergyID. Combine them with the identifier of the
+converter.
 
 ````yaml
 energyid:
   secret-url: "https://hooks.energyid.eu/services/WebhookIn/xxxxx-xxx/..."
-
-````
-
-### Proxy configuration
-
-To combine you need to set each EnergyID meter and link it up to a serial number of the AlphaESS
-system. Below are two examples:
-
-```yaml
-proxy:
+  max-data-batch-size: 100
   meters:
-    - alphaSn: "ALSERIALNUMBER00001"
-      remoteId: "solarAlphaEss001"
-      remoteName: "solarAlphaEss001"
+    - converterId: "FOO_BAR"
+      remoteId: "FOO_BAR"
+      remoteName: "FOO_BAR"
       metric: "solarPhotovoltaicProduction"
       unit: "kWh"
       readingType: "premarkedInterval"
-    - alphaSn: "ALSERIALNUMBER00002"
-      remoteId: "solarAlphaEss002"
-      remoteName: "solarAlphaEss002"
-      metric: "solarPhotovoltaicProduction"
-      unit: "kWh"
-      readingType: "premarkedInterval"
-```
-
-**Be aware that all readings will be marked as read at 00:00 of the current day.**
-
-If need be several settings can be adjusted.
-
-````yaml
-proxy:
-  timezone: "Europe/Brussels"
-  export-cron: "0 50 23 * * ?"
 ````
