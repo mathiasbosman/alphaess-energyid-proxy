@@ -15,14 +15,11 @@ alphaess:
     password: "bar"
   timezone: "Europe/Brussels"
 
-proxy:
-  export-cron: "0 50 23 * * ?"
-
 energyid:
   secret-url: "https://hooks.energyid.eu/services/WebhookIn/xxxxxxxx-xxxx-xxxx-xxxx"
   max-data-batch-size: 100
   meters:
-    - alphaSn: "FOO_BAR"
+    - converterId: "FOO_BAR"
       remoteId: "FOO_BAR"
       remoteName: "FOO_BAR"
       metric: "solarPhotovoltaicProduction"

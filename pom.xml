@@ -10,7 +10,7 @@
     <relativePath/> <!-- lookup parent from repository -->
   </parent>
   <groupId>be.mathiasbosman</groupId>
-  <artifactId>alphaess-energyid-proxy</artifactId>
+  <artifactId>converter-data-export</artifactId>
   <build>
     <plugins>
       <plugin>
@@ -35,15 +35,15 @@
         <configuration>
           <excludes>
             <!-- main application class -->
-            <exclude>**/AlphaEssEnergyIdProxyApplication.class</exclude>
+            <exclude>**/ConverterDataExportApplication.class</exclude>
             <!-- controller -->
-            <exclude>**/controller/**</exclude>
+            <exclude>**/*Controller.*</exclude>
             <!-- jackson classes -->
             <exclude>**/response/**</exclude>
-            <!-- configs -->
-            <exclude>**/config/**</exclude>
+            <!-- properties -->
+            <exclude>**/*Properties.*</exclude>
             <!-- dto's -->
-            <exclude>**/dto/**</exclude>
+            <exclude>**/*Dto.*</exclude>
           </excludes>
         </configuration>
         <executions>
@@ -65,8 +65,8 @@
       </plugin>
     </plugins>
   </build>
-  <name>alphaess-energyid-proxy</name>
-  <description>Proxy for transferring AlphaESS data to EnergyID</description>
+  <description>Export application for converter data</description>
+  <name>converter-data-export</name>
   <properties>
     <java.version>17</java.version>
   </properties>
