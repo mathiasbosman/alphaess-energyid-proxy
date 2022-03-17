@@ -27,6 +27,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.web.client.RestTemplate;
 
 @ExtendWith(MockitoExtension.class)
@@ -75,9 +77,24 @@ class AlphaessDataCollectorTest {
   }
 
   @Test
+  void buildNoneAuthHeaders() {
+    HttpHeaders httpHeaders = alphaessDataCollector.buildHeaders(null);
+
+    assertHttpHeaders(httpHeaders, null);
+  }
+
+  @Test
+  void buildAuthHeaders() {
+    HttpHeaders httpHeaders = alphaessDataCollector.buildHeaders("123");
+
+    assertHttpHeaders(httpHeaders, "Bearer 123");
+  }
+
+  @Test
   void isTokenValid() {
     LoginData missingToken = LoginData.builder().accessToken(null).build();
     LoginData expiresInIsZero = LoginData.builder().accessToken("123").expiresIn(0).build();
+    LoginData expiresInIsNegative = LoginData.builder().accessToken("123").expiresIn(-1).build();
     LoginData creationTimeIsNull = LoginData.builder().accessToken("123").expiresIn(10)
         .tokenCreateTime(null).build();
     LoginData validToken = LoginData.builder().accessToken("123").expiresIn(1000)
@@ -85,6 +102,7 @@ class AlphaessDataCollectorTest {
 
     assertThat(alphaessDataCollector.isTokenValid(missingToken)).isFalse();
     assertThat(alphaessDataCollector.isTokenValid(expiresInIsZero)).isFalse();
+    assertThat(alphaessDataCollector.isTokenValid(expiresInIsNegative)).isFalse();
     assertThat(alphaessDataCollector.isTokenValid(creationTimeIsNull)).isFalse();
     assertThat(alphaessDataCollector.isTokenValid(validToken)).isTrue();
   }
@@ -96,10 +114,12 @@ class AlphaessDataCollectorTest {
     response.setData(Statistics.builder().pvTotal(50).build());
     when(restTemplate.postForObject(any(), any(), eq(SticsByPeriodResponseEntity.class)))
         .thenReturn(response);
+    LocalDate today = LocalDate.now();
 
-    Optional<PvStatistics> stats = alphaessDataCollector.getTotalPv("sn", LocalDate.now());
+    Optional<PvStatistics> stats = alphaessDataCollector.getTotalPv("sn", today);
     assertThat(stats).isNotEmpty();
     assertThat(stats.get().getPvTotal()).isEqualTo(50);
+    assertThat(stats.get().getDate()).isEqualTo(today);
   }
 
   @Test
@@ -107,6 +127,17 @@ class AlphaessDataCollectorTest {
     mockAuth();
     when(restTemplate.postForObject(any(), any(), eq(SticsByPeriodResponseEntity.class)))
         .thenReturn(null);
+
+    assertThat(alphaessDataCollector.getTotalPv("123", LocalDate.now())).isEmpty();
+  }
+
+  @Test
+  void getTotalPvWithoutData() {
+    mockAuth();
+    SticsByPeriodResponseEntity sticsByPeriodResponseEntity = new SticsByPeriodResponseEntity();
+    sticsByPeriodResponseEntity.setData(null);
+    when(restTemplate.postForObject(any(), any(), eq(SticsByPeriodResponseEntity.class)))
+        .thenReturn(sticsByPeriodResponseEntity);
 
     assertThat(alphaessDataCollector.getTotalPv("123", LocalDate.now())).isEmpty();
   }
@@ -129,5 +160,16 @@ class AlphaessDataCollectorTest {
   @Test
   void getTimeZone() {
     assertThat(alphaessDataCollector.getZoneId()).isEqualTo(ZoneId.of(timeZone));
+  }
+
+  private void assertHttpHeaders(HttpHeaders headers, String authorisation) {
+    assertThat(headers.getContentType()).isEqualTo(MediaType.APPLICATION_JSON);
+    assertThat(headers.getConnection()).contains("keep-alive");
+    assertThat(headers.getCacheControl()).isEqualTo("no-cache");
+    if (authorisation != null) {
+      assertThat(headers.get("Authorization")).contains(authorisation);
+    } else {
+      assertThat(headers.get("Authorization")).isNull();
+    }
   }
 }

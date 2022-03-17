@@ -3,7 +3,6 @@ package be.mathiasbosman.inverterdataexport.exporter.energyid;
 import be.mathiasbosman.inverterdataexport.exporter.energyid.dto.MeterReadingsDto;
 import be.mathiasbosman.inverterdataexport.util.CollectionUtils;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -54,12 +53,8 @@ public class EnergyIdWebhookAdapterImpl implements EnergyIdWebhookAdapter {
   private void postSingleBatchReadings(MeterReadingsDto parentDto, List<List<Object>> data) {
     MeterReadingsDto batchDto = createBatchReadingsDto(parentDto, data);
     HttpEntity<MeterReadingsDto> batchRequest = new HttpEntity<>(batchDto);
-    try {
-      log.debug("Posting {} data records", batchDto.data().size());
-      postData(energyIdProperties.getSecretUrl().toURI(), batchRequest);
-    } catch (URISyntaxException e) {
-      throw new IllegalStateException("Exception while forming URI", e);
-    }
+    log.debug("Posting {} data records", batchDto.data().size());
+    postData(energyIdProperties.getSecretUri(), batchRequest);
   }
 
   private MeterReadingsDto createBatchReadingsDto(MeterReadingsDto parentDto,

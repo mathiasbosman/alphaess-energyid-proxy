@@ -7,10 +7,8 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 import be.mathiasbosman.inverterdataexport.exporter.energyid.dto.MeterReadingsDto;
-import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.IntStream;
@@ -38,13 +36,13 @@ class EnergyIdWebhookAdapterImplTest {
   private ArgumentCaptor<HttpEntity<MeterReadingsDto>> httpEntityArgumentCaptor;
 
   @BeforeEach
-  void initAdapter() throws MalformedURLException {
-    energyIdProperties.setSecretUrl(new URL("https://foo/bar"));
+  void initAdapter() throws URISyntaxException {
+    energyIdProperties.setSecretUri(new URI("https://foo/bar"));
     webhookAdapter = new EnergyIdWebhookAdapterImpl(restTemplate, energyIdProperties);
   }
 
   @Test
-  void postSingleBatchReadings() throws URISyntaxException {
+  void postSingleBatchReadings() {
     MeterReadingsDto readingsDto = createMeterReadingsDto(10);
     energyIdProperties.setMaxDataBatchSize(0);
 
@@ -53,7 +51,7 @@ class EnergyIdWebhookAdapterImplTest {
     verify(restTemplate, times(1)).postForLocation(uriArgumentCaptor.capture(),
         httpEntityArgumentCaptor.capture());
 
-    assertThat(uriArgumentCaptor.getValue()).isEqualTo(energyIdProperties.getSecretUrl().toURI());
+    assertThat(uriArgumentCaptor.getValue()).isEqualTo(energyIdProperties.getSecretUri());
     assertThat(httpEntityArgumentCaptor.getValue().getBody()).isEqualTo(readingsDto);
   }
 

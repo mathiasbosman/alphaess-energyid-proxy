@@ -16,7 +16,7 @@ alphaess:
   timezone: "Europe/Brussels"
 
 energyid:
-  secret-url: "https://hooks.energyid.eu/services/WebhookIn/xxxxxxxx-xxxx-xxxx-xxxx"
+  secret-uri: "https://hooks.energyid.eu/services/WebhookIn/xxxxxxxx-xxxx-xxxx-xxxx"
   max-data-batch-size: 100
   meters:
     - inverterId: "FOO_BAR"

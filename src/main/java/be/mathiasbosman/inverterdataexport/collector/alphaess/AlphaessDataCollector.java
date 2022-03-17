@@ -16,7 +16,6 @@ import java.time.ZoneId;
 import java.util.Date;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
-import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.CacheControl;
@@ -24,6 +23,7 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -41,18 +41,34 @@ public class AlphaessDataCollector extends AbstractDataCollector {
 
   private LoginData loginData;
 
-  private HttpHeaders buildHeaders(boolean isSecure) {
+  HttpHeaders buildHeaders(String bearerToken) {
     HttpHeaders headers = new HttpHeaders();
     headers.setContentType(MediaType.APPLICATION_JSON);
     headers.setConnection("keep-alive");
     headers.setCacheControl(CacheControl.noCache());
-    if (isSecure) {
-      if (loginData == null || !isTokenValid(loginData)) {
-        loginData = authenticate(LoginDto.fromCredentials(alphaessProperties.getCredentials()));
-      }
-      headers.setBearerAuth(loginData.getAccessToken());
+    if (StringUtils.hasLength(bearerToken)) {
+      headers.setBearerAuth(bearerToken);
     }
     return headers;
+  }
+
+  private String getOrRefreshAccessToken() {
+    if (loginData == null || !isTokenValid(loginData)) {
+      loginData = authenticate(LoginDto.fromCredentials(alphaessProperties.getCredentials()));
+    }
+    return loginData.getAccessToken();
+  }
+
+  boolean isTokenValid(LoginData loginData) {
+    if (loginData.getAccessToken() != null
+        && loginData.getExpiresIn() != 0
+        && loginData.getTokenCreateTime() != null) {
+      Date date = new Date();
+      long diffInMillies = Math.abs(date.getTime() - loginData.getTokenCreateTime().getTime());
+      long diff = TimeUnit.SECONDS.convert(diffInMillies, TimeUnit.MILLISECONDS);
+      return diff < loginData.getExpiresIn();
+    }
+    return false;
   }
 
   URI buildUri(String path) {
@@ -71,25 +87,13 @@ public class AlphaessDataCollector extends AbstractDataCollector {
   public LoginData authenticate(LoginDto loginDto) {
     URI uri = buildUri(alphaessProperties.getEndpoints().getAuthentication());
     log.trace("Authenticating on {}", uri);
-    HttpEntity<LoginDto> request = new HttpEntity<>(loginDto, buildHeaders(false));
+    HttpEntity<LoginDto> request = new HttpEntity<>(loginDto, buildHeaders(null));
     LoginResponseEntity responseEntity = restTemplate.postForObject(uri, request,
         LoginResponseEntity.class);
     if (responseEntity == null) {
       throw new IllegalStateException("Response entity is null");
     }
     return responseEntity.getData();
-  }
-
-  boolean isTokenValid(@NonNull LoginData loginData) {
-    if (loginData.getAccessToken() != null
-        && loginData.getExpiresIn() != 0
-        && loginData.getTokenCreateTime() != null) {
-      Date date = new Date();
-      long diffInMillies = Math.abs(date.getTime() - loginData.getTokenCreateTime().getTime());
-      long diff = TimeUnit.SECONDS.convert(diffInMillies, TimeUnit.MILLISECONDS);
-      return diff < loginData.getExpiresIn();
-    }
-    return false;
   }
 
   @Override
@@ -105,14 +109,15 @@ public class AlphaessDataCollector extends AbstractDataCollector {
    * @return Optional of {@link Statistics}
    */
   @Override
-  public Optional<PvStatistics> getTotalPv(@NonNull String serial, @NonNull LocalDate date) {
+  public Optional<PvStatistics> getTotalPv(String serial, LocalDate date) {
     URI uri = buildUri(alphaessProperties.getEndpoints().getDailyStats());
     log.trace("Getting statistics on {} for {} on {}", uri, serial, date);
     LocalDateTime startDay = date.atStartOfDay();
     LocalDateTime endDay = date.atTime(LocalTime.MAX);
     StatisticsDto statisticsDto = new StatisticsDto(startDay, endDay, LocalDate.now(), 0, serial,
         "", true);
-    HttpEntity<StatisticsDto> request = new HttpEntity<>(statisticsDto, buildHeaders(true));
+    HttpEntity<StatisticsDto> request = new HttpEntity<>(statisticsDto,
+        buildHeaders(getOrRefreshAccessToken()));
     SticsByPeriodResponseEntity result = restTemplate.postForObject(uri, request,
         SticsByPeriodResponseEntity.class);
     if (result == null || result.getData() == null) {

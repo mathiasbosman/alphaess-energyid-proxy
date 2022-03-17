@@ -2,7 +2,7 @@ package be.mathiasbosman.inverterdataexport.exporter.energyid;
 
 import static be.mathiasbosman.inverterdataexport.exporter.energyid.EnergyIdProperties.PREFIX;
 
-import java.net.URL;
+import java.net.URI;
 import java.util.List;
 import javax.validation.constraints.NotNull;
 import lombok.Data;
@@ -26,10 +26,10 @@ public class EnergyIdProperties {
   public static final String PREFIX = "energyid";
 
   /**
-   * Secret {@link URL} of the webhook.
+   * Secret {@link URI} of the webhook.
    */
   @NotNull
-  private URL secretUrl;
+  private URI secretUri;
 
   /**
    * List of {@link EnergyIdMeter} meters.
