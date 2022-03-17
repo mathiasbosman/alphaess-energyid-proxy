@@ -1,7 +1,7 @@
 # Solar inverter data exporter
 
-[![Build](https://github.com/mathiasbosman/inverter-data-export/actions/workflows/build.yml/badge.svg)](https://github.com/mathiasbosman/alphaess-energyid-proxy/actions/workflows/build.yml)
-[![codecov](https://codecov.io/gh/mathiasbosman/inverter-data-export/branch/master/graph/badge.svg?token=VixDPmMsct)](https://codecov.io/gh/mathiasbosman/alphaess-energyid-proxy)
+[![Build](https://github.com/mathiasbosman/inverter-data-export/actions/workflows/build.yml/badge.svg)](https://github.com/mathiasbosman/inverter-data-export/actions/workflows/build.yml)
+[![codecov](https://codecov.io/gh/mathiasbosman/inverter-data-export/branch/master/graph/badge.svg?token=VixDPmMsct)](https://codecov.io/gh/mathiasbosman/inverter-data-export)
 
 This application allows the export of data from a solar inverter.
 
