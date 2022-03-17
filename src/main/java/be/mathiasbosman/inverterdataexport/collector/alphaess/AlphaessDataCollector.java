@@ -52,14 +52,17 @@ public class AlphaessDataCollector extends AbstractDataCollector {
     return headers;
   }
 
-  private String getOrRefreshAccessToken() {
-    if (loginData == null || !isTokenValid(loginData)) {
-      loginData = authenticate(LoginDto.fromCredentials(alphaessProperties.getCredentials()));
+  String getOrRefreshAccessToken() {
+    if (!isTokenValid(loginData)) {
+      authenticate(LoginDto.fromCredentials(alphaessProperties.getCredentials()));
     }
     return loginData.getAccessToken();
   }
 
   boolean isTokenValid(LoginData loginData) {
+    if (loginData == null) {
+      return false;
+    }
     if (loginData.getAccessToken() != null
         && loginData.getExpiresIn() != 0
         && loginData.getTokenCreateTime() != null) {
@@ -82,9 +85,8 @@ public class AlphaessDataCollector extends AbstractDataCollector {
    * Authenticate with the API.
    *
    * @param loginDto Used credentials
-   * @return {@link LoginData}
    */
-  public LoginData authenticate(LoginDto loginDto) {
+  void authenticate(LoginDto loginDto) {
     URI uri = buildUri(alphaessProperties.getEndpoints().getAuthentication());
     log.trace("Authenticating on {}", uri);
     HttpEntity<LoginDto> request = new HttpEntity<>(loginDto, buildHeaders(null));
@@ -93,7 +95,7 @@ public class AlphaessDataCollector extends AbstractDataCollector {
     if (responseEntity == null) {
       throw new IllegalStateException("Response entity is null");
     }
-    return responseEntity.getData();
+    this.loginData = responseEntity.getData();
   }
 
   @Override

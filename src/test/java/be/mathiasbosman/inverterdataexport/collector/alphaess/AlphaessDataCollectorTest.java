@@ -39,13 +39,14 @@ class AlphaessDataCollectorTest {
   private final AlphaessProperties alphaessProperties = new AlphaessProperties();
   private final Endpoints endpoints = new Endpoints();
 
-  private static final String timeZone = "Europe/Brussels";
+  private static final String TIME_ZONE = "Europe/Brussels";
+  private static final String MOCK_TOKEN = "123";
   private AlphaessDataCollector alphaessDataCollector;
 
   @BeforeEach
   void initService() throws MalformedURLException {
     alphaessProperties.setBaseUrl(new URL("https://foo"));
-    alphaessProperties.setTimezone(timeZone);
+    alphaessProperties.setTimezone(TIME_ZONE);
     endpoints.setAuthentication("/auth");
     endpoints.setDailyStats("/stats");
     alphaessProperties.setEndpoints(endpoints);
@@ -59,11 +60,11 @@ class AlphaessDataCollectorTest {
 
   @Test
   void authentication() {
-    LoginData mockedData = mockAuth();
+    mockAuth();
 
-    LoginData authenticate = alphaessDataCollector.authenticate(new LoginDto("foo", "bar"));
+    alphaessDataCollector.authenticate(new LoginDto("foo", "bar"));
 
-    assertThat(authenticate).isEqualTo(mockedData);
+    assertThat(alphaessDataCollector.getOrRefreshAccessToken()).isNotNull();
   }
 
   @Test
@@ -85,21 +86,37 @@ class AlphaessDataCollectorTest {
 
   @Test
   void buildAuthHeaders() {
-    HttpHeaders httpHeaders = alphaessDataCollector.buildHeaders("123");
+    HttpHeaders httpHeaders = alphaessDataCollector.buildHeaders(MOCK_TOKEN);
 
-    assertHttpHeaders(httpHeaders, "Bearer 123");
+    assertHttpHeaders(httpHeaders, "Bearer " + MOCK_TOKEN);
   }
 
   @Test
   void isTokenValid() {
-    LoginData missingToken = LoginData.builder().accessToken(null).build();
-    LoginData expiresInIsZero = LoginData.builder().accessToken("123").expiresIn(0).build();
-    LoginData expiresInIsNegative = LoginData.builder().accessToken("123").expiresIn(-1).build();
-    LoginData creationTimeIsNull = LoginData.builder().accessToken("123").expiresIn(10)
-        .tokenCreateTime(null).build();
-    LoginData validToken = LoginData.builder().accessToken("123").expiresIn(1000)
-        .tokenCreateTime(new Date()).build();
+    LoginData missingToken = LoginData.builder().
+        accessToken(null)
+        .build();
+    LoginData expiresInIsZero = LoginData.builder()
+        .accessToken(MOCK_TOKEN)
+        .expiresIn(0)
+        .build();
+    LoginData expiresInIsNegative = LoginData.builder()
+        .accessToken(MOCK_TOKEN)
+        .expiresIn(-1)
+        .tokenCreateTime(new Date())
+        .build();
+    LoginData creationTimeIsNull = LoginData.builder()
+        .accessToken(MOCK_TOKEN)
+        .expiresIn(10)
+        .tokenCreateTime(null)
+        .build();
+    LoginData validToken = LoginData.builder()
+        .accessToken(MOCK_TOKEN)
+        .expiresIn(1000)
+        .tokenCreateTime(new Date())
+        .build();
 
+    assertThat(alphaessDataCollector.isTokenValid(null)).isFalse();
     assertThat(alphaessDataCollector.isTokenValid(missingToken)).isFalse();
     assertThat(alphaessDataCollector.isTokenValid(expiresInIsZero)).isFalse();
     assertThat(alphaessDataCollector.isTokenValid(expiresInIsNegative)).isFalse();
@@ -142,24 +159,47 @@ class AlphaessDataCollectorTest {
     assertThat(alphaessDataCollector.getTotalPv("123", LocalDate.now())).isEmpty();
   }
 
-  private LoginData mockAuth() {
+  @Test
+  void getOrRefreshAccessTokenFirstRun() {
+    mockAuth();
+
+    String token = alphaessDataCollector.getOrRefreshAccessToken();
+
+    assertThat(token).isEqualTo(MOCK_TOKEN);
+  }
+
+  @Test
+  void getOrRefreshAccessTokenExistingToken() {
+    mockAuth();
+
+    String firstToken = alphaessDataCollector.getOrRefreshAccessToken();
+    String secondToken = alphaessDataCollector.getOrRefreshAccessToken();
+
+    assertThat(firstToken)
+        .isEqualTo(secondToken)
+        .isEqualTo(MOCK_TOKEN);
+  }
+
+  private void mockAuth() {
     Credentials credentials = new Credentials();
     credentials.setUsername("foo");
     credentials.setPassword("bar");
     alphaessProperties.setCredentials(credentials);
-    LoginData loginData = LoginData.builder().accessToken("123").build();
+    LoginData loginData = LoginData.builder()
+        .accessToken(MOCK_TOKEN)
+        .expiresIn(Double.MAX_VALUE)
+        .tokenCreateTime(new Date())
+        .build();
     LoginResponseEntity responseEntity = new LoginResponseEntity();
     responseEntity.setData(loginData);
 
     when(restTemplate.postForObject(any(), any(), eq(LoginResponseEntity.class)))
         .thenReturn(responseEntity);
-
-    return loginData;
   }
 
   @Test
   void getTimeZone() {
-    assertThat(alphaessDataCollector.getZoneId()).isEqualTo(ZoneId.of(timeZone));
+    assertThat(alphaessDataCollector.getZoneId()).isEqualTo(ZoneId.of(TIME_ZONE));
   }
 
   private void assertHttpHeaders(HttpHeaders headers, String authorisation) {
