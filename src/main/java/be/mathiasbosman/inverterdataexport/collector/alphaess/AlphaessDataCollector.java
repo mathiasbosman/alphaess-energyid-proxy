@@ -7,6 +7,7 @@ import be.mathiasbosman.inverterdataexport.collector.alphaess.response.LoginResp
 import be.mathiasbosman.inverterdataexport.collector.alphaess.response.SticsByPeriodResponseEntity;
 import be.mathiasbosman.inverterdataexport.collector.alphaess.response.SticsByPeriodResponseEntity.Statistics;
 import be.mathiasbosman.inverterdataexport.domain.AbstractDataCollector;
+import be.mathiasbosman.inverterdataexport.domain.ExporterException;
 import be.mathiasbosman.inverterdataexport.domain.PvStatistics;
 import java.net.URI;
 import java.time.LocalDate;
@@ -18,6 +19,7 @@ import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.slf4j.event.Level;
 import org.springframework.http.CacheControl;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -93,7 +95,7 @@ public class AlphaessDataCollector extends AbstractDataCollector {
     LoginResponseEntity responseEntity = restTemplate.postForObject(uri, request,
         LoginResponseEntity.class);
     if (responseEntity == null) {
-      throw new IllegalStateException("Response entity is null");
+      throw new ExporterException(Level.ERROR, "Response entity of authentication is null");
     }
     this.loginData = responseEntity.getData();
   }

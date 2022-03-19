@@ -36,8 +36,8 @@
           <excludes>
             <!-- main application class -->
             <exclude>**/InverterDataExportApplication.*</exclude>
-            <!-- controller -->
-            <exclude>**/*Controller.*</exclude>
+            <!-- controller advice-->
+            <exclude>**/*ControllerAdvice.*</exclude>
             <!-- jackson classes -->
             <exclude>**/response/**</exclude>
             <!-- properties -->

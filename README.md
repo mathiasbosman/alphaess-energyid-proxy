@@ -1,7 +1,6 @@
 # Solar inverter data exporter
 
 [![Build](https://github.com/mathiasbosman/inverter-data-export/actions/workflows/build.yml/badge.svg)](https://github.com/mathiasbosman/inverter-data-export/actions/workflows/build.yml)
-[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=mathiasbosman_inverter-data-export&metric=coverage)](https://sonarcloud.io/summary/new_code?id=mathiasbosman_inverter-data-export)
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=mathiasbosman_inverter-data-export&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=mathiasbosman_inverter-data-export)
 
 This application allows the export of data from a solar inverter.

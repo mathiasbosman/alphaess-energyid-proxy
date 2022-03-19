@@ -4,8 +4,8 @@ import be.mathiasbosman.inverterdataexport.domain.ExportService;
 import java.time.LocalDate;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -25,7 +25,7 @@ public class EnergyIdExportController {
    * @param inverterId Unique id of the inverter
    * @return {@link ResponseEntity}
    */
-  @GetMapping("/trigger/weeklyExport/{inverterId}")
+  @PutMapping("/trigger/weeklyExport/{inverterId}")
   public ResponseEntity<Object> triggerWeeklyExport(
       @PathVariable("inverterId") String inverterId) {
     LocalDate today = LocalDate.now();
