@@ -13,6 +13,7 @@ import be.mathiasbosman.inverterdataexport.collector.alphaess.response.LoginResp
 import be.mathiasbosman.inverterdataexport.collector.alphaess.response.LoginResponseEntity.LoginData;
 import be.mathiasbosman.inverterdataexport.collector.alphaess.response.SticsByPeriodResponseEntity;
 import be.mathiasbosman.inverterdataexport.collector.alphaess.response.SticsByPeriodResponseEntity.Statistics;
+import be.mathiasbosman.inverterdataexport.domain.ExporterException;
 import be.mathiasbosman.inverterdataexport.domain.PvStatistics;
 import java.net.MalformedURLException;
 import java.net.URI;
@@ -73,7 +74,7 @@ class AlphaessDataCollectorTest {
         .thenReturn(null);
 
     LoginDto loginDto = new LoginDto("foo", "bar");
-    assertThrows(IllegalStateException.class,
+    assertThrows(ExporterException.class,
         () -> alphaessDataCollector.authenticate(loginDto));
   }
 

@@ -3,17 +3,19 @@ package be.mathiasbosman.inverterdataexport;
 import be.mathiasbosman.inverterdataexport.domain.PvStatistics;
 import java.time.LocalDate;
 import java.util.Random;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
 
+@Getter
+@AllArgsConstructor
 public class PvStatisticStub implements PvStatistics {
 
-  @Override
-  public LocalDate getDate() {
-    return LocalDate.now();
-  }
+  private LocalDate date;
+  private double pvTotal;
 
-  @Override
-  public double getPvTotal() {
+  public PvStatisticStub() {
+    this.date = LocalDate.now();
     Random random = new Random();
-    return random.nextDouble();
+    this.pvTotal = random.nextDouble();
   }
 }
