@@ -2,6 +2,7 @@ package be.mathiasbosman.inverterdataexport.exporter.energyid;
 
 import be.mathiasbosman.inverterdataexport.domain.DataCollector;
 import be.mathiasbosman.inverterdataexport.domain.ExportService;
+import be.mathiasbosman.inverterdataexport.domain.ExporterException;
 import be.mathiasbosman.inverterdataexport.domain.PvStatistics;
 import be.mathiasbosman.inverterdataexport.exporter.energyid.EnergyIdProperties.EnergyIdMeter;
 import be.mathiasbosman.inverterdataexport.exporter.energyid.dto.MeterReadingsDto;
@@ -12,6 +13,7 @@ import java.time.ZoneId;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.slf4j.event.Level;
 import org.springframework.stereotype.Component;
 
 /**
@@ -56,6 +58,6 @@ public class EnergyIdExportService implements ExportService {
     return energyIdProperties.getMeters().stream()
         .filter(meter -> meter.getInverterId().equals(inverterId))
         .findFirst()
-        .orElseThrow();
+        .orElseThrow(() -> new ExporterException(Level.ERROR, "No meter found for %s", inverterId));
   }
 }
