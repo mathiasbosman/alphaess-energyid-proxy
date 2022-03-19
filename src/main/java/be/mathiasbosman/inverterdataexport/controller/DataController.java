@@ -1,6 +1,6 @@
 package be.mathiasbosman.inverterdataexport.controller;
 
-import be.mathiasbosman.inverterdataexport.domain.DataCollector;
+import be.mathiasbosman.inverterdataexport.collector.DataCollector;
 import be.mathiasbosman.inverterdataexport.domain.PvStatistics;
 import java.time.LocalDate;
 import lombok.RequiredArgsConstructor;

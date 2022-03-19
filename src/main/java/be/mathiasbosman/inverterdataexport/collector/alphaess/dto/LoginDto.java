@@ -7,7 +7,7 @@ import be.mathiasbosman.inverterdataexport.collector.alphaess.AlphaessProperties
  */
 public record LoginDto(String username, String password) {
 
-  public static LoginDto fromCredentials(Credentials creds) {
-    return new LoginDto(creds.getUsername(), creds.getPassword());
+  public static LoginDto fromCredentials(Credentials credentials) {
+    return new LoginDto(credentials.getUsername(), credentials.getPassword());
   }
 }

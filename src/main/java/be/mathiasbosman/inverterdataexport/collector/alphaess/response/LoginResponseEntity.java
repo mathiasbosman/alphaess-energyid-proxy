@@ -25,8 +25,8 @@ public class LoginResponseEntity extends ResponseEntity {
   @Getter
   @Setter
   @Builder
-  @AllArgsConstructor
   @NoArgsConstructor
+  @AllArgsConstructor
   public static class LoginData {
 
     private String accessToken;

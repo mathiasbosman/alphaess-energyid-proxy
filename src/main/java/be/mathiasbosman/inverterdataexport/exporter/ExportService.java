@@ -1,4 +1,4 @@
-package be.mathiasbosman.inverterdataexport.domain;
+package be.mathiasbosman.inverterdataexport.exporter;
 
 import java.time.LocalDate;
 

@@ -19,7 +19,7 @@ import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
 /**
- * Controller for exception handling.
+ * Controller Advice for exception handling.
  */
 @Slf4j
 @RestControllerAdvice

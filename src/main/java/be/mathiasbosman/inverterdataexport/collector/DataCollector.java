@@ -1,5 +1,6 @@
-package be.mathiasbosman.inverterdataexport.domain;
+package be.mathiasbosman.inverterdataexport.collector;
 
+import be.mathiasbosman.inverterdataexport.domain.PvStatistics;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.List;
@@ -14,5 +15,6 @@ public interface DataCollector {
 
   Optional<PvStatistics> getTotalPv(String inverterId, LocalDate date);
 
-  List<PvStatistics> getTotalPvForPeriod(String inverterId, LocalDate start, LocalDate end);
+  List<Optional<PvStatistics>> getTotalPvForPeriod(String inverterId, LocalDate start,
+      LocalDate end);
 }

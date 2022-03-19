@@ -12,7 +12,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import be.mathiasbosman.inverterdataexport.AbstractControllerTest;
 import be.mathiasbosman.inverterdataexport.PvStatisticStub;
-import be.mathiasbosman.inverterdataexport.domain.DataCollector;
+import be.mathiasbosman.inverterdataexport.collector.DataCollector;
 import java.time.LocalDate;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;

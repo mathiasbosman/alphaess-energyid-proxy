@@ -22,8 +22,8 @@ public class EssListResponseEntity extends ResponseEntity {
    */
   @Getter
   @Setter
-  @ToString(of = {"sysSn", "sysName", "emsStatus"})
   @NoArgsConstructor
+  @ToString(of = {"sysSn", "sysName", "emsStatus"})
   public static class EssSystemData {
 
     @JsonProperty("sys_sn")
