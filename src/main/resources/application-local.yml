@@ -1,5 +1,3 @@
-energyid:
-  mock: true
 logging:
   level:
     ROOT: INFO
