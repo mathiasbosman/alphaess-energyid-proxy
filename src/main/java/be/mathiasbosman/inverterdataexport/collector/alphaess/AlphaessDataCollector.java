@@ -1,12 +1,12 @@
 package be.mathiasbosman.inverterdataexport.collector.alphaess;
 
+import be.mathiasbosman.inverterdataexport.collector.AbstractDataCollector;
 import be.mathiasbosman.inverterdataexport.collector.alphaess.dto.LoginDto;
 import be.mathiasbosman.inverterdataexport.collector.alphaess.dto.StatisticsDto;
 import be.mathiasbosman.inverterdataexport.collector.alphaess.response.LoginResponseEntity;
 import be.mathiasbosman.inverterdataexport.collector.alphaess.response.LoginResponseEntity.LoginData;
 import be.mathiasbosman.inverterdataexport.collector.alphaess.response.SticsByPeriodResponseEntity;
 import be.mathiasbosman.inverterdataexport.collector.alphaess.response.SticsByPeriodResponseEntity.Statistics;
-import be.mathiasbosman.inverterdataexport.domain.AbstractDataCollector;
 import be.mathiasbosman.inverterdataexport.domain.ExporterException;
 import be.mathiasbosman.inverterdataexport.domain.PvStatistics;
 import java.net.URI;
@@ -69,8 +69,8 @@ public class AlphaessDataCollector extends AbstractDataCollector {
         && loginData.getExpiresIn() != 0
         && loginData.getTokenCreateTime() != null) {
       Date date = new Date();
-      long diffInMillies = Math.abs(date.getTime() - loginData.getTokenCreateTime().getTime());
-      long diff = TimeUnit.SECONDS.convert(diffInMillies, TimeUnit.MILLISECONDS);
+      long diffInMillis = Math.abs(date.getTime() - loginData.getTokenCreateTime().getTime());
+      long diff = TimeUnit.SECONDS.convert(diffInMillis, TimeUnit.MILLISECONDS);
       return diff < loginData.getExpiresIn();
     }
     return false;

@@ -26,8 +26,8 @@ public class SticsByPeriodResponseEntity extends ResponseEntity {
   @Setter
   @ToString
   @Builder
-  @AllArgsConstructor
   @NoArgsConstructor
+  @AllArgsConstructor
   @JsonIgnoreProperties(ignoreUnknown = true)
   public static class Statistics {
 

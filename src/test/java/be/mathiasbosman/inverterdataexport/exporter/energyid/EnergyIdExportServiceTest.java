@@ -8,13 +8,14 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import be.mathiasbosman.inverterdataexport.PvStatisticStub;
-import be.mathiasbosman.inverterdataexport.domain.DataCollector;
+import be.mathiasbosman.inverterdataexport.collector.DataCollector;
 import be.mathiasbosman.inverterdataexport.domain.ExporterException;
 import be.mathiasbosman.inverterdataexport.exporter.energyid.EnergyIdProperties.EnergyIdMeter;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -87,8 +88,8 @@ class EnergyIdExportServiceTest {
     when(dataCollector.getZoneId()).thenReturn(ZoneId.of("Europe/Brussels"));
     when(dataCollector.getTotalPvForPeriod(any(), any(), any()))
         .thenReturn(List.of(
-            new PvStatisticStub(),
-            new PvStatisticStub()
+            Optional.of(new PvStatisticStub()),
+            Optional.of(new PvStatisticStub())
         ));
   }
 }

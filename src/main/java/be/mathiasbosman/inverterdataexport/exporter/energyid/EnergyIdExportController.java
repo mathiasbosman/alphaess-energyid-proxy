@@ -1,6 +1,6 @@
 package be.mathiasbosman.inverterdataexport.exporter.energyid;
 
-import be.mathiasbosman.inverterdataexport.domain.ExportService;
+import be.mathiasbosman.inverterdataexport.exporter.ExportService;
 import java.time.LocalDate;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -30,7 +30,9 @@ public class EnergyIdExportController {
       @PathVariable("inverterId") String inverterId) {
     LocalDate today = LocalDate.now();
     LocalDate pastWeek = today.minusWeeks(1);
+
     exportService.exportPvStatisticsForPeriod(inverterId, pastWeek, today);
+
     return ResponseEntity.ok().build();
   }
 }

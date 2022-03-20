@@ -25,3 +25,4 @@ energyid:
       metric: "solarPhotovoltaicProduction"
       unit: "kWh"
       readingType: "premarkedInterval"
+  mock: true

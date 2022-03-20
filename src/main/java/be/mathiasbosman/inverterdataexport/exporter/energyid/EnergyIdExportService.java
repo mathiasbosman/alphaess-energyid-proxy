@@ -1,9 +1,8 @@
 package be.mathiasbosman.inverterdataexport.exporter.energyid;
 
-import be.mathiasbosman.inverterdataexport.domain.DataCollector;
-import be.mathiasbosman.inverterdataexport.domain.ExportService;
+import be.mathiasbosman.inverterdataexport.collector.DataCollector;
 import be.mathiasbosman.inverterdataexport.domain.ExporterException;
-import be.mathiasbosman.inverterdataexport.domain.PvStatistics;
+import be.mathiasbosman.inverterdataexport.exporter.ExportService;
 import be.mathiasbosman.inverterdataexport.exporter.energyid.EnergyIdProperties.EnergyIdMeter;
 import be.mathiasbosman.inverterdataexport.exporter.energyid.dto.MeterReadingsDto;
 import be.mathiasbosman.inverterdataexport.util.DateUtils;
@@ -11,6 +10,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.List;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.event.Level;
@@ -32,32 +32,46 @@ public class EnergyIdExportService implements ExportService {
    * Exports statistics to the EnergyID platform for a given period.
    *
    * @param inverterId The unique id of the inverter
-   * @param start       Start date
-   * @param end         End date (not inclusive)
+   * @param start      Start date
+   * @param end        End date (not inclusive)
    */
   public void exportPvStatisticsForPeriod(String inverterId, LocalDate start, LocalDate end) {
-    EnergyIdMeter energyIdMeter = getEnergyIdMeter(inverterId);
-    List<PvStatistics> statistics = dataCollector.getTotalPvForPeriod(inverterId, start, end);
+    List<EnergyIdMeter> energyIdMeter = getEnergyIdMeters(inverterId);
     ZoneId zoneId = dataCollector.getZoneId();
+    energyIdMeter.forEach(meter -> exportPeriodStatisticsForMeter(meter, zoneId, start, end));
+  }
 
-    MeterReadingsDto meterReadingsDto = MeterReadingsDto.fromEnergyIdMeter(energyIdMeter);
-    statistics.forEach(pvStatistics -> {
-      LocalDateTime localDateTime = DateUtils.atStartOfDayInZone(pvStatistics.getDate(), zoneId);
-      List<Object> data = List.of(
-          DateUtils.formatAsIsoDate(localDateTime, zoneId),
-          pvStatistics.getPvTotal());
-      meterReadingsDto.data().add(data);
-    });
+  private void exportPeriodStatisticsForMeter(EnergyIdMeter meter, ZoneId zoneId, LocalDate start,
+      LocalDate end) {
+    MeterReadingsDto meterReadingsDto = MeterReadingsDto.fromEnergyIdMeter(meter);
+
+    dataCollector.getTotalPvForPeriod(meter.getInverterId(), start, end).stream()
+        .filter(Optional::isPresent)
+        .map(Optional::get)
+        .forEach(pvStatistics -> {
+          LocalDateTime dateTime = DateUtils.atStartOfDayInZone(pvStatistics.getDate(), zoneId);
+          String isoTimestamp = DateUtils.formatAsIsoDate(dateTime, zoneId);
+          meterReadingsDto.data().add(buildPvData(isoTimestamp, pvStatistics.getPvTotal()));
+        });
 
     if (!meterReadingsDto.data().isEmpty()) {
       webhookAdapter.postReadings(meterReadingsDto);
     }
   }
 
-  private EnergyIdMeter getEnergyIdMeter(String inverterId) {
-    return energyIdProperties.getMeters().stream()
+  private List<Object> buildPvData(String timestamp, double pvTotal) {
+    return List.of(timestamp, pvTotal);
+  }
+
+  private List<EnergyIdMeter> getEnergyIdMeters(String inverterId) {
+    List<EnergyIdMeter> meters = energyIdProperties.getMeters().stream()
         .filter(meter -> meter.getInverterId().equals(inverterId))
-        .findFirst()
-        .orElseThrow(() -> new ExporterException(Level.ERROR, "No meter found for %s", inverterId));
+        .toList();
+
+    if (!meters.isEmpty()) {
+      return meters;
+    }
+    throw new ExporterException(Level.ERROR,
+        String.format("No EnergyID meter found with inverter id: %s", inverterId));
   }
 }

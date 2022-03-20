@@ -1,5 +1,6 @@
 package be.mathiasbosman.inverterdataexport.exporter.energyid;
 
+import be.mathiasbosman.inverterdataexport.exporter.WebhookAdapter;
 import be.mathiasbosman.inverterdataexport.exporter.energyid.dto.MeterReadingsDto;
 
 /**
