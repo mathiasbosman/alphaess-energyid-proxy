@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 /**
  * Dto to post to the AlphaESS to retrieve statistics.
  */
-public record StatisticsDto(
+public record StatisticsRequestDto(
     @JsonFormat(pattern = AlphaessProperties.DATE_FORMAT_PATTERN)
     @JsonProperty("beginDay")
     LocalDateTime beginDay,

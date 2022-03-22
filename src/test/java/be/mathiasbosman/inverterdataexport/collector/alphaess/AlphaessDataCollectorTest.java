@@ -8,7 +8,7 @@ import static org.mockito.Mockito.when;
 
 import be.mathiasbosman.inverterdataexport.collector.alphaess.AlphaessProperties.Credentials;
 import be.mathiasbosman.inverterdataexport.collector.alphaess.AlphaessProperties.Endpoints;
-import be.mathiasbosman.inverterdataexport.collector.alphaess.dto.LoginDto;
+import be.mathiasbosman.inverterdataexport.collector.alphaess.dto.LoginRequestDto;
 import be.mathiasbosman.inverterdataexport.collector.alphaess.response.LoginResponseEntity;
 import be.mathiasbosman.inverterdataexport.collector.alphaess.response.LoginResponseEntity.LoginData;
 import be.mathiasbosman.inverterdataexport.collector.alphaess.response.SticsByPeriodResponseEntity;
@@ -63,7 +63,7 @@ class AlphaessDataCollectorTest {
   void authentication() {
     mockAuth();
 
-    alphaessDataCollector.authenticate(new LoginDto("foo", "bar"));
+    alphaessDataCollector.authenticate(new LoginRequestDto("foo", "bar"));
 
     assertThat(alphaessDataCollector.getOrRefreshAccessToken()).isNotNull();
   }
@@ -73,9 +73,19 @@ class AlphaessDataCollectorTest {
     when(restTemplate.postForObject(any(), any(), eq(LoginResponseEntity.class)))
         .thenReturn(null);
 
-    LoginDto loginDto = new LoginDto("foo", "bar");
+    LoginRequestDto loginRequestDto = new LoginRequestDto("foo", "bar");
     assertThrows(ExporterException.class,
-        () -> alphaessDataCollector.authenticate(loginDto));
+        () -> alphaessDataCollector.authenticate(loginRequestDto));
+  }
+
+  @Test
+  void authenticationFailsWithNoData() {
+    when(restTemplate.postForObject(any(), any(), eq(LoginResponseEntity.class)))
+        .thenReturn(new LoginResponseEntity());
+
+    LoginRequestDto loginRequestDto = new LoginRequestDto("foo", "bar");
+    assertThrows(ExporterException.class,
+        () -> alphaessDataCollector.authenticate(loginRequestDto));
   }
 
   @Test
