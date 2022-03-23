@@ -5,7 +5,6 @@ import java.util.Map;
 import java.util.Optional;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
-import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.event.Level;
 import org.springframework.boot.web.error.ErrorAttributeOptions;
@@ -45,7 +44,7 @@ public class ExceptionHandlerControllerAdvice extends ResponseEntityExceptionHan
 
   private ResponseEntity<Map<String, Object>> createResponseEntityAndLogException(
       WebRequest request,
-      HttpStatus httpStatus, Throwable exception, @NonNull Level logLevel) {
+      HttpStatus httpStatus, Throwable exception, Level logLevel) {
     ResponseEntity<Map<String, Object>> response = createResponseEntity(request, httpStatus);
     final String logPl = "Error with ID: {} - {} - {}";
     switch (logLevel) {
@@ -63,13 +62,13 @@ public class ExceptionHandlerControllerAdvice extends ResponseEntityExceptionHan
     return response;
   }
 
-  private Object errorIdFromErrorAttributes(@NonNull ResponseEntity<Map<String, Object>> response) {
+  private Object errorIdFromErrorAttributes(ResponseEntity<Map<String, Object>> response) {
     return Optional.ofNullable(response.getBody())
         .map(body -> body.get(ErrorAttributesWithUuid.ERROR_ID)).orElse("");
   }
 
   private ResponseEntity<Map<String, Object>> createResponseEntity(WebRequest request,
-      @NonNull HttpStatus httpStatus) {
+      HttpStatus httpStatus) {
     Map<String, Object> attributes = errorAttributes.getErrorAttributes(request,
         ErrorAttributeOptions.of(Include.MESSAGE, Include.EXCEPTION));
     attributes.put("status", httpStatus.value());

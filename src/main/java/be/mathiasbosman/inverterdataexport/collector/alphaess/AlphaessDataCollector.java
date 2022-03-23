@@ -1,8 +1,8 @@
 package be.mathiasbosman.inverterdataexport.collector.alphaess;
 
 import be.mathiasbosman.inverterdataexport.collector.AbstractDataCollector;
-import be.mathiasbosman.inverterdataexport.collector.alphaess.dto.LoginDto;
-import be.mathiasbosman.inverterdataexport.collector.alphaess.dto.StatisticsDto;
+import be.mathiasbosman.inverterdataexport.collector.alphaess.dto.LoginRequestDto;
+import be.mathiasbosman.inverterdataexport.collector.alphaess.dto.StatisticsRequestDto;
 import be.mathiasbosman.inverterdataexport.collector.alphaess.response.LoginResponseEntity;
 import be.mathiasbosman.inverterdataexport.collector.alphaess.response.LoginResponseEntity.LoginData;
 import be.mathiasbosman.inverterdataexport.collector.alphaess.response.SticsByPeriodResponseEntity;
@@ -56,7 +56,7 @@ public class AlphaessDataCollector extends AbstractDataCollector {
 
   String getOrRefreshAccessToken() {
     if (!isTokenValid(loginData)) {
-      authenticate(LoginDto.fromCredentials(alphaessProperties.getCredentials()));
+      authenticate(LoginRequestDto.fromCredentials(alphaessProperties.getCredentials()));
     }
     return loginData.getAccessToken();
   }
@@ -86,16 +86,20 @@ public class AlphaessDataCollector extends AbstractDataCollector {
   /**
    * Authenticate with the API.
    *
-   * @param loginDto Used credentials
+   * @param loginRequestDto Used credentials
    */
-  void authenticate(LoginDto loginDto) {
+  void authenticate(LoginRequestDto loginRequestDto) {
     URI uri = buildUri(alphaessProperties.getEndpoints().getAuthentication());
     log.trace("Authenticating on {}", uri);
-    HttpEntity<LoginDto> request = new HttpEntity<>(loginDto, buildHeaders(null));
+    HttpEntity<LoginRequestDto> request = new HttpEntity<>(loginRequestDto, buildHeaders(null));
     LoginResponseEntity responseEntity = restTemplate.postForObject(uri, request,
         LoginResponseEntity.class);
     if (responseEntity == null) {
       throw new ExporterException(Level.ERROR, "Response entity of authentication is null");
+    }
+    if (responseEntity.getData() == null) {
+      throw new ExporterException(Level.ERROR, "Authentication failed with info: %s",
+          responseEntity.getInfo());
     }
     this.loginData = responseEntity.getData();
   }
@@ -118,9 +122,10 @@ public class AlphaessDataCollector extends AbstractDataCollector {
     log.trace("Getting statistics on {} for {} on {}", uri, serial, date);
     LocalDateTime startDay = date.atStartOfDay();
     LocalDateTime endDay = date.atTime(LocalTime.MAX);
-    StatisticsDto statisticsDto = new StatisticsDto(startDay, endDay, LocalDate.now(), 0, serial,
+    StatisticsRequestDto statisticsRequestDto = new StatisticsRequestDto(startDay, endDay,
+        LocalDate.now(), 0, serial,
         "", true);
-    HttpEntity<StatisticsDto> request = new HttpEntity<>(statisticsDto,
+    HttpEntity<StatisticsRequestDto> request = new HttpEntity<>(statisticsRequestDto,
         buildHeaders(getOrRefreshAccessToken()));
     SticsByPeriodResponseEntity result = restTemplate.postForObject(uri, request,
         SticsByPeriodResponseEntity.class);
