@@ -31,6 +31,7 @@ alphaess:
     password: "bar"
   timezone: "Europe/Brussels"
 ```
+(these are also the default values
 
 ### Exporters
 
