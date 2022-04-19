@@ -5,7 +5,7 @@
 
 This application allows the export of data from a solar inverter.
 
-Currently, only one the [AlphaESS](https://www.alpha-ess.com) inverter (battery) is supported.
+Currently, only the [AlphaESS](https://www.alpha-ess.com) inverter (battery) is supported.
 
 Exporting is currently only supported to the [EnergyID](https://energyid.eu) platform.
 
